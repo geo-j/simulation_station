@@ -32,7 +32,7 @@ SOLAR_PANELS = [
 
 # CHARGING_STRATEGY = 
 
-N_CARS = 50
+N_CARS = 350
 N_PARKING_SPOTS = 7
 PARKING_SPOTS = [60, 80, 60, 70, 60, 60, 50]
 PARKING_PREFERENCE = [0.15, 0.15, 0.15, 0.20, 0.15, 0.10, 0.10]
@@ -107,7 +107,7 @@ class Arrival(CarEvent):
             #print("There are now " + str(state.parking_spots_used[parking_location[checks]]) + " free spots remaining.")
             #print(f"A car wants to park from {str(self.car.arrival_hour)} until {str(self.car.planned_departure)} at {str(parking_location[checks])}")
         else:
-            # print("Left")
+            #print("Left")
             state.n_no_space += 1
 
 class StartCharging(CarEvent):
@@ -129,6 +129,7 @@ class StopCharging(CarEvent):
 class Departure(CarEvent):
     def event_handler(self):
         state.parking_spots_used[self.car.parking_spot] -= 1
+        # print(state.parking_spots_used[self.car.parking_spot])
         delay = time - self.car.planned_departure
         if delay > 0:
             state.n_delays += 1
@@ -199,7 +200,6 @@ def init():
     arrival_hours = []
     connection_times = []
     charging_volumes = []
-    cars = []
     global events
 
     with open('Data/arrival_hours.csv', 'r') as f:
@@ -210,15 +210,23 @@ def init():
 
     with open('Data/charging_volume.csv', 'r') as f:
         charging_volumes = [float(line.strip().split(';')[1].replace(',', '.')) for line in f if 'Charging' not in line]
+        charging_volumes = [volume / sum(charging_volumes) for volume in charging_volumes]      # normalise charging probabilities
 
     for _ in range(N_DAYS):
         # TODO: generate connection_time such that connection_time * 0.7 > charging_time
         n_cars = int(np.random.normal(loc = N_CARS, scale = CAR_DEVIATION))
-        cars = [Car(arrival_hour = i * 24 + np.random.randint(len(arrival_hours)) * FRAME + np.random.randint(FRAME),    # generate increasing arrival times for each of the N_DAYS
-        connection_time = np.random.randint(len(connection_times)) * FRAME + np.random.randint(FRAME),                   # generate a connection time from the aggregate interval, and add a generated subunit of hour 
-        charging_time   = int(np.random.randint(len(charging_volumes)) * FRAME + np.random.randint(FRAME)) / CHARGING_RATE) for i in range(n_cars)] # generate a connection time from the aggregate interval, and add a generate subunit of hour for each car, and then convert it to the charging time
-        for car in cars:
-            events.put((car.arrival_hour, next(unique), Arrival(car)))
+        
+        for i in range(n_cars):
+            connection_time = np.random.choice(a = len(connection_times), p = connection_times) * FRAME + np.random.randint(FRAME) # generate a connection time from the aggregate interval, and add a generated subunit of hour 
+            charging_time = int(min(np.random.choice(a = len(charging_volumes), p = charging_volumes) * FRAME + np.random.randint(FRAME) / CHARGING_RATE, connection_time * 0.7))      # generate a connection time from the aggregate interval, and add a generate subunit of hour for each car, and then convert it to the charging time
+            arrival_hour = i * 24 + np.random.choice(a = len(arrival_hours), p = arrival_hours) * FRAME + np.random.randint(FRAME)                        # generate increasing arrival times for each of the N_DAYS
+        
+            print(connection_time)
+
+            events.put((arrival_hour, next(unique), 
+                        Arrival(Car(arrival_hour = arrival_hour,    
+                            connection_time = connection_time,                  
+                            charging_time   = charging_time))))
     
 
 if __name__ == '__main__':
