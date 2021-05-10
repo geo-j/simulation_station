@@ -7,6 +7,7 @@ N_DAYS = 7
 CAR_DEVIATION = 50
 FRAME = 10000
 PARKING_CHECKS = 3
+# CHARGING_STRATEGY = 
 
 N_CARS = 50
 N_PARKING_SPOTS = 7
@@ -14,6 +15,24 @@ PARKING_SPOTS = [60, 80, 60, 70, 60, 60, 50]
 PARKING_PREFERENCE = [0.15, 0.15, 0.15, 0.20, 0.15, 0.10, 0.10]
 PRICE_PER_KWH = [16, 16, 18, 18, 22, 20]
 N_CABLES = 9
+
+time = 0
+
+class ChargingStrategy(object):
+    def __init__(self):
+        pass
+
+    def start_charge(self):
+        pass
+
+
+class BaseChargingStrategy(ChargingStrategy):
+    def __init__(self):
+        pass
+
+    def start_charge(self):
+        print(f'Car wants to charge at time {time}')
+        return time
 
 class Car(object):
     def __init__(self, arrival_hour, connection_time, charging_volume):
@@ -39,29 +58,42 @@ class Arrival(CarEvent):
 
         found_spot = False
         checks = -1
+        print("Some car arrived")
         while not found_spot and checks != 2:
             checks += 1
             found_spot = (PARKING_SPOTS[parking_location[checks]] > state.parking_spots_used[parking_location[checks]])       # check whether there is a free parking spot
 
         if found_spot:
+            print("Found spot")
+            state.n_vehicles += 1
             state.parking_spots_used[parking_location[checks]] += 1
-            print("A car wants to park from " + str(self.car.arrival_hour) + " until " + str(self.car.planned_departure) + " at " + str(parking_location[checks]))
-            print("There are now " + str(state.parking_spots_used[parking_location[checks]]) + " free spots remaining.")
-            print(f"A car wants to park from {str(self.car.arrival_hour)} until {str(self.car.planned_departure)} at {str(parking_location[checks])}")
+            events.put((time, next(unique), StartCharging(self.car)))
+
+            #print("A car wants to park from " + str(self.car.arrival_hour) + " until " + str(self.car.planned_departure) + " at " + str(parking_location[checks]))
+            #print("There are now " + str(state.parking_spots_used[parking_location[checks]]) + " free spots remaining.")
+            #print(f"A car wants to park from {str(self.car.arrival_hour)} until {str(self.car.planned_departure)} at {str(parking_location[checks])}")
         else:
-            print("A car left")
+            print("Left")
+            state.n_no_space += 1
         # print(parking_location.len)
         # 
         # either leave, or park
 
 class StartCharging(CarEvent):
-        pass
+    def event_handler(self):
+        charge_time = self.car.charging_volume / float(6)
+        print("We started charging")
+        events.put((time + charge_time, next(unique), StopCharging(self.car)))
 
 class StopCharging(CarEvent):
-    pass
+    def event_handler(self):
+        print("We stopped charging")
+        events.put((max(time, self.car.planned_departure), next(unique), Departure(self.car)))
 
 class Departure(CarEvent):
-    pass
+    def event_handler(self):
+        
+        print("We leave")
 
 class Cable(object):
     def __init__(self):
@@ -121,5 +153,8 @@ def init():
 if __name__ == '__main__':
     init()
     while not events.empty():
-        event = events.get()[2]
+        event_info = events.get()
+        time = event_info[0]
+        print("Current time: " + str(time))
+        event = event_info[2]
         event.event_handler()
