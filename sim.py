@@ -1,5 +1,4 @@
 import actors
-import simulation as sim
 
 import numpy as np
 from queue import PriorityQueue
@@ -42,31 +41,6 @@ PARKING_PREFERENCE = [0.15, 0.15, 0.15, 0.20, 0.15, 0.10, 0.10]
 PRICE_PER_KWH = [16, 16, 18, 18, 22, 20]
 N_CABLES = 10
 
-
-class ChargingStrategy(object):
-    def __init__(self):
-        pass
-
-    def start_charge(self):
-        pass
-
-
-class BaseChargingStrategy(ChargingStrategy):
-    def __init__(self):
-        pass
-
-    def start_charge(self):
-        # print(f'Car wants to charge at time {time}')
-        return simulation.time
-
-class PriceDrivenChargingStrategy(ChargingStrategy):
-    def __init__(self):
-        pass
-
-    def start_charge(self):
-        pass
-        
-        return 
 
 
 class Event(object):
