@@ -17,7 +17,6 @@ def init():
     arrival_hours = []
     connection_times = []
     charging_volumes = []
-    global events
 
     with open('Data/arrival_hours.csv', 'r') as f:
         arrival_hours = [float(line.strip().split(';')[1].replace(',', '.')) for line in f if 'Arrival' not in line]
