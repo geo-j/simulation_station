@@ -1,7 +1,7 @@
 import actors
 import constants as ct
 import simulation
-from sim import unique
+from main import unique
 
 import numpy as np
 
