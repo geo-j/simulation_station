@@ -1,3 +1,6 @@
+import actors
+import simulation as sim
+
 import numpy as np
 from queue import PriorityQueue
 from itertools import count
@@ -39,7 +42,6 @@ PARKING_PREFERENCE = [0.15, 0.15, 0.15, 0.20, 0.15, 0.10, 0.10]
 PRICE_PER_KWH = [16, 16, 18, 18, 22, 20]
 N_CABLES = 10
 
-time = 0
 
 class ChargingStrategy(object):
     def __init__(self):
@@ -55,7 +57,7 @@ class BaseChargingStrategy(ChargingStrategy):
 
     def start_charge(self):
         # print(f'Car wants to charge at time {time}')
-        return time
+        return simulation.time
 
 class PriceDrivenChargingStrategy(ChargingStrategy):
     def __init__(self):
@@ -66,27 +68,20 @@ class PriceDrivenChargingStrategy(ChargingStrategy):
         
         return 
 
-class Car(object):
-    def __init__(self, arrival_hour, connection_time, charging_time):
-        self.arrival_hour = arrival_hour
-        self.connection_time = connection_time
-        self.charging_time = charging_time
-        self.planned_departure = arrival_hour + connection_time
-        self.parking_spot = -1    # not parked yet
 
 class Event(object):
     def __init__(self):
         pass
 
-    def event_handler(self):
+    def event_handler(self, time):
         pass
 
 class CarEvent(Event):
-    def __init__(self, car:Car):
+    def __init__(self, car:actors.Car):
         self.car = car
 
 class Arrival(CarEvent):
-    def event_handler(self):
+    def event_handler(self, time):
         parking_location = np.random.choice(a = len(PARKING_PREFERENCE), size = PARKING_CHECKS, replace = False, p = PARKING_PREFERENCE)
         
         found_spot = False        
@@ -111,23 +106,23 @@ class Arrival(CarEvent):
             state.n_no_space += 1
 
 class StartCharging(CarEvent):
-    def event_handler(self):
+    def event_handler(self, time):
         # print("We started charging")
         for i in CABLE_PATHS[self.car.parking_spot]:
-            state.cables[i].add_charge(CHARGING_RATE)
+            state.cables[i].add_charge(CHARGING_RATE, time)
         
         events.put((time + self.car.charging_time, next(unique), StopCharging(self.car)))
 
 class StopCharging(CarEvent):
-    def event_handler(self):
+    def event_handler(self, time):
         # print("We stopped charging")
         for i in CABLE_PATHS[self.car.parking_spot]:
-            state.cables[i].add_charge(-CHARGING_RATE)
+            state.cables[i].add_charge(-CHARGING_RATE, time)
             
         events.put((max(time, self.car.planned_departure), next(unique), Departure(self.car)))
 
 class Departure(CarEvent):
-    def event_handler(self):
+    def event_handler(self, time):
         state.parking_spots_used[self.car.parking_spot] -= 1
         # print(state.parking_spots_used[self.car.parking_spot])
         delay = time - self.car.planned_departure
@@ -136,33 +131,7 @@ class Departure(CarEvent):
             state.max_delay = max(state.max_delay, delay)
             state.delays_sum += delay
 
-class Cable(object):
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.load = 0
-        self.blackout = 0   # > 10% overload
-        self.overload = 0
-        self.loads = [(0, 0)]   # (time, load)
 
-    def add_charge(self, charge:int):
-        old_load = self.load
-        self.load += charge
-        self.loads.append([time, self.load])
-        
-        if old_load < self.capacity and self.load > self.capacity:
-            self.overload -= time
-
-        if old_load > self.capacity and self.load < self.capacity:
-            self.overload += time
-
-        if old_load < self.capacity * 1.1 and self.load > self.capacity * 1.1:
-            self.blackout -= time
-
-        if old_load > self.capacity * 1.1 and self.load < self.capacity * 1.1:
-            self.blackout += time
-    
-    def __str__(self):
-        return f'Cable:\n \tPercentage of Overload: {100 * self.overload / float(time)}\n \tPercentage of Blackout: {100 * self.blackout / float(time)}\n'
 
 class State(object):
     """- load for each cable
@@ -177,8 +146,8 @@ class State(object):
     - planned departure time for each vehicle
     - charging volume for each vehicle"""
     def __init__(self):
-        self.cables = [Cable(CABLE_CAPACITY) for _ in range(N_CABLES - 1)]
-        self.cables.append(Cable(TRANSFORMER_CAPACITY))
+        self.cables = [actors.Cable(CABLE_CAPACITY) for _ in range(N_CABLES - 1)]
+        self.cables.append(actors.Cable(TRANSFORMER_CAPACITY))
         # , Cable(TRANSFORMER_CAPACITY)]
         self.parking_spots_used = [0] * N_PARKING_SPOTS
         self.n_vehicles = 0     # # total vehicles
@@ -195,6 +164,7 @@ class State(object):
 
 events = PriorityQueue()
 state = State()
+time = 0
 
 def init():
     arrival_hours = []
@@ -224,7 +194,7 @@ def init():
             print(connection_time)
 
             events.put((arrival_hour, next(unique), 
-                        Arrival(Car(arrival_hour = arrival_hour,    
+                        Arrival(actors.Car(arrival_hour = arrival_hour,    
                             connection_time = connection_time,                  
                             charging_time   = charging_time))))
     
@@ -235,9 +205,9 @@ if __name__ == '__main__':
         event_info = events.get()
         time = event_info[0]
         event = event_info[2]
-        event.event_handler()
+        event.event_handler(time)
 
     print(state)
     for cable in state.cables:
-        print(f'{cable}')
+        print(f'Cable:\n \tPercentage of Overload: {100 * cable.overload / float(time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(time)}\n')
 
