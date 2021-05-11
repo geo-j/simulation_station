@@ -1,3 +1,7 @@
+"""
+This is the main runnable file of the project
+"""
+
 import simulation
 import actors
 import constants as ct
@@ -34,7 +38,7 @@ def init():
             charging_time = int(min(np.random.choice(a = len(charging_volumes), p = charging_volumes) * ct.FRAME + np.random.randint(ct.FRAME) / ct.CHARGING_RATE, connection_time * 0.7))      # generate a connection time from the aggregate interval, and add a generate subunit of hour for each car, and then convert it to the charging time
             arrival_hour = i * 24 + np.random.choice(a = len(arrival_hours), p = arrival_hours) * ct.FRAME + np.random.randint(ct.FRAME)                        # generate increasing arrival times for each of the N_DAYS
         
-            print(connection_time)
+            # print(connection_time)
 
             sim.events.put((arrival_hour, next(unique), 
                         e.Arrival(actors.Car(arrival_hour = arrival_hour,    
@@ -50,7 +54,7 @@ if __name__ == '__main__':
         event = event_info[2]
         event.event_handler(sim)
 
-    print(sim.state)
+        print(sim.state)
     for cable in sim.state.cables:
         print(f'Cable:\n \tPercentage of Overload: {100 * cable.overload / float(sim.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.time)}\n')
 

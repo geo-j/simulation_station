@@ -1,3 +1,9 @@
+"""
+This file contains the data structures of the simulation:
+- Simulation: class containing the time, event queue and state
+- State: class containing all the state properties
+"""
+
 from queue import PriorityQueue
 import actors
 import constants as ct

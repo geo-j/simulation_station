@@ -1,3 +1,7 @@
+"""
+This file contains the implementation of the different charging strategies applied in the simulation
+"""
+
 class ChargingStrategy(object):
     def __init__(self):
         pass

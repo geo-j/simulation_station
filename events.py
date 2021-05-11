@@ -1,3 +1,7 @@
+"""
+This file contains the events that drive the simulation
+"""
+
 import actors
 import constants as ct
 import simulation

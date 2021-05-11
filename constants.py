@@ -1,3 +1,7 @@
+"""
+This file contains the constants used throughout the project
+"""
+
 
 N_DAYS = 7
 CAR_DEVIATION = 50

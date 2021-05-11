@@ -1,3 +1,7 @@
+"""
+This file contains the classes referring to the variable 'actors' of the simulation: the cars and the cables, whose state changes
+"""
+
 class Car(object):
     def __init__(self, arrival_hour, connection_time, charging_time):
         self.arrival_hour = arrival_hour
