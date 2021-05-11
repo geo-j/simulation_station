@@ -1,3 +1,4 @@
 exercises/
 *.pdf
 Data/
+__pycache__
