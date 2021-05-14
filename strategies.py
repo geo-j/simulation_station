@@ -3,6 +3,7 @@ This file contains the implementation of the different charging strategies appli
 """
 from actors import Car
 import constants as ct
+from queue import PriorityQueue
 
 class ChargingStrategy(object):
     def __init__(self):
@@ -16,7 +17,7 @@ class BaseChargingStrategy(ChargingStrategy):
     def __init__(self):
         pass
 
-    def start_charge(self, time, car):
+    def start_charge(self, time, car:Car):
         # print(f'Car wants to charge at time {time}')
         return time
 
@@ -88,16 +89,22 @@ class PriceDrivenChargingStrategy(ChargingStrategy):
     def valid_time(self, start_time, car:Car):
         return (start_time + car.charging_time < car.planned_departure)
 
-class FCFSChargingStrategy(ChargingStrategy):
+class AggregatorChargingStrategy(ChargingStrategy):
     def __init__(self):
-        pass
+        self.queues = [
+            PriorityQueue(),
+            PriorityQueue(),
+            PriorityQueue(),
+            PriorityQueue(),
+            PriorityQueue(),
+            PriorityQueue(),
+            PriorityQueue()
+        ]
 
+class FCFSChargingStrategy(AggregatorChargingStrategy):
     def start_charge(self, time, car):
         return time
 
-class ELFSChargingStrategy(ChargingStrategy):
-    def __init__(self):
-        pass
-
+class ELFSChargingStrategy(AggregatorChargingStrategy):
     def start_charge(self, time, car):
         return time

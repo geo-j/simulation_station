@@ -48,18 +48,45 @@ class Arrival(CarEvent):
 class StartCharging(CarEvent):
     def event_handler(self, simulation):
         # print("We started charging")
+        car.charging_start = simulation.time
+        car.charging_rate = ct.CHARGING_RATE
+        # charging rate should be initiated to 6
+        simulation.parking_spots_electricity[car.parking_spot] += car.charging_rate
         for i in ct.CABLE_PATHS[self.car.parking_spot]:
             simulation.state.cables[i].add_charge(ct.CHARGING_RATE, simulation.time)
         
         simulation.events.put((simulation.time + self.car.charging_time, next(unique), StopCharging(self.car)))
 
 class StopCharging(CarEvent):
+    # check if charging is complete, if not reschedule start charging at the same time
     def event_handler(self, simulation):
         # print("We stopped charging")
         for i in ct.CABLE_PATHS[self.car.parking_spot]:
             simulation.state.cables[i].add_charge(-ct.CHARGING_RATE, simulation.time)
+
+        car.charging_start = simulation.time
+        car.charging_rate = 0
+        car.charging_time = -1
+        simulation.parking_spots_electricity[car.parking_spot] -= car.charging_rate
             
         simulation.events.put((max(simulation.time, self.car.planned_departure), next(unique), Departure(self.car)))
+
+class ChangeCharging(CarEvent): # changes charging rate
+    # how to continue to make sure it speeds up again?
+    # when more energy becomes available
+    # some state?
+    def event_handler(self, simulation: Simulation, charge):
+        charging_volume = car.charging_time * car.charging_rate # back to this...
+        car.charging_time -= (simulation.time - car.charging_start)
+        
+        car.charging_start = simulation.time
+        car.charging_rate = charge
+        if car.charging_rate == 0:
+            car.charging_time = -1
+        else:
+            car.charging_time = charging_volume / car.charging_rate
+
+        # TODO: no stat updates yet
 
 class Departure(CarEvent):
     def event_handler(self, simulation):
@@ -70,3 +97,16 @@ class Departure(CarEvent):
             simulation.state.n_delays += 1
             simulation.state.max_delay = max(simulation.state.max_delay, delay)
             simulation.state.delays_sum += delay
+
+
+class ChangeSolarCharge(Event):
+    def event_handler(self, simulation):
+        expected_revenue = ct.SOLAR_PANEL_CAPACITY * simulation.solar_availability_factor[simulation.time / 3600 % 24][ct.SEASON]
+        actual_revenue = np.random.normal(loc = expected_revenue, scale = 0.15 * expected_revenue)
+
+        # energy decreases:
+            # more energy would be required from the transformer
+            # some cables may be even more loaded
+        # energy increases:
+            # less energy would be required from the transformer
+            # some cables may be less loaded

@@ -9,6 +9,8 @@ class Car(object):
         self.charging_time = charging_time
         self.planned_departure = arrival_hour + connection_time
         self.parking_spot = -1    # not parked yet
+        self.charging_start = -1  # has not started
+        self.charging_rate = 0    # has not started charging
 
 class Cable(object):
     def __init__(self, capacity):

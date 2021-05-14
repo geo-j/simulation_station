@@ -26,6 +26,7 @@ class State(object):
         self.cables.append(actors.Cable(ct.TRANSFORMER_CAPACITY))
         # , Cable(TRANSFORMER_CAPACITY)]
         self.parking_spots_used = [0] * ct.N_PARKING_SPOTS
+        self.parking_spots_electricity = [0] * ct.N_PARKING_SPOTS
         self.n_vehicles = 0     # # total vehicles
         self.n_delays   = 0     # # total amount of delayed cars
         self.n_no_space = 0     # # vehicles that couldn't park
@@ -35,8 +36,10 @@ class State(object):
     def __str__(self):
         return f'State:\n \tParking Spots in Use: {self.parking_spots_used}\n \tTotal # of Vehicles: {self.n_vehicles}\n \tTotal # of Delayed Vehicles: {self.n_delays}\n \tTotal # of Vehicles that Couldn\'t Park: {self.n_no_space}\n \tTotal Amount of Delay: {self.delays_sum}\n \tMax Delay: {self.max_delay}\n\n'
 
-        # print('\tCables:')
-        # print(cable for cable in self.cables)
+    def update_charge(self, solar_charge):
+        for parking_spot in ct.SOLAR_PANELS[ct.SOLAR_PARKING_SPOTS]:
+            pass
+
 
 
 class Simulation(object):
@@ -45,3 +48,4 @@ class Simulation(object):
         self.state = State()
         self.events = PriorityQueue()
         self.strategy = strategies.PriceDrivenChargingStrategy()
+        self.solar_availability_factor = []

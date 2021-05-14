@@ -14,6 +14,7 @@ unique = count()
 sim = simulation.Simulation()
 
 def init():
+    global sim
     arrival_hours = []
     connection_times = []
     charging_volumes = []
@@ -24,10 +25,16 @@ def init():
     with open('Data/connection_time.csv', 'r') as f:
         connection_times = [float(line.strip().split(';')[1].replace(',', '.')) for line in f if 'Connection' not in line]
 
+    # normalise charging probabilities
     with open('Data/charging_volume.csv', 'r') as f:
         charging_volumes = [float(line.strip().split(';')[1].replace(',', '.')) for line in f if 'Charging' not in line]
-        charging_volumes = [volume / sum(charging_volumes) for volume in charging_volumes]      # normalise charging probabilities
+        charging_volumes = [volume / sum(charging_volumes) for volume in charging_volumes]      
 
+    with open('Data/solar.csv', 'r') as f:
+        sim.solar_availability_factor = [tuple(map(float, line.strip().split(',')[1:])) for line in f if 'AVG' not in line]
+            
+            # TODO: add check for values being between 0 and 200kW
+    
     for _ in range(ct.N_DAYS):
         # TODO: generate connection_time such that connection_time * 0.7 > charging_time
         n_cars = int(np.random.normal(loc = ct.N_CARS, scale = ct.CAR_DEVIATION))
