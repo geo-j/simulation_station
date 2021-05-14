@@ -53,7 +53,7 @@ if __name__ == '__main__':
         event = event_info[2]
         event.event_handler(sim)
 
-        print(sim.state)
-    for cable in sim.state.cables:
-        print(f'Cable:\n \tPercentage of Overload: {100 * cable.overload / float(sim.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.time)}\n')
+    print(sim.state)
+    # for cable in sim.state.cables:
+    #     print(f'Cable:\n \tPercentage of Overload: {100 * cable.overload / float(sim.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.time)}\n')
 

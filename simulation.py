@@ -7,6 +7,7 @@ This file contains the data structures of the simulation:
 from queue import PriorityQueue
 import actors
 import constants as ct
+import strategies
 
 class State(object):
     """- load for each cable
@@ -43,3 +44,4 @@ class Simulation(object):
         self.time = 0
         self.state = State()
         self.events = PriorityQueue()
+        self.strategy = strategies.PriceDrivenChargingStrategy()

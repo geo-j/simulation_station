@@ -2,9 +2,9 @@
 This file contains the events that drive the simulation
 """
 
-import actors
+from actors import Car
 import constants as ct
-import simulation
+from simulation import Simulation
 from main import unique
 
 import numpy as np
@@ -13,11 +13,11 @@ class Event(object):
     def __init__(self):
         pass
 
-    def event_handler(self, simulation:simulation.Simulation):
+    def event_handler(self, simulation:Simulation):
         pass
 
 class CarEvent(Event):
-    def __init__(self, car:actors.Car):
+    def __init__(self, car:Car):
         self.car = car
 
 class Arrival(CarEvent):
@@ -36,9 +36,9 @@ class Arrival(CarEvent):
             simulation.state.n_vehicles += 1
             self.car.parking_spot = parking_location[checks]
             simulation.state.parking_spots_used[self.car.parking_spot] += 1
-            simulation.events.put((simulation.time, next(unique), StartCharging(self.car)))
+            simulation.events.put((simulation.strategy.start_charge(simulation.time, self.car), next(unique), StartCharging(self.car)))
 
-            #print("A car wants to park from " + str(self.car.arrival_hour) + " until " + str(self.car.planned_departure) + " at " + str(parking_location[checks]))
+            # print("A car wants to park from " + str(self.car.arrival_hour) + " until " + str(self.car.planned_departure) + " at " + str(parking_location[checks]))
             #print("There are now " + str(state.parking_spots_used[parking_location[checks]]) + " free spots remaining.")
             #print(f"A car wants to park from {str(self.car.arrival_hour)} until {str(self.car.planned_departure)} at {str(parking_location[checks])}")
         else:
