@@ -48,17 +48,13 @@ class Arrival(CarEvent):
 class StartCharging(CarEvent):
     def event_handler(self, simulation):
         # print("We started charging")
-        for i in ct.CABLE_PATHS[self.car.parking_spot]:
-            simulation.state.cables[i].add_charge(ct.CHARGING_RATE, simulation.time)
-        
+        simulation.state.add_charge(self.car.parking_spot, ct.CHARGING_RATE)
         simulation.events.put((simulation.time + self.car.charging_time, next(unique), StopCharging(self.car)))
 
 class StopCharging(CarEvent):
     def event_handler(self, simulation):
         # print("We stopped charging")
-        for i in ct.CABLE_PATHS[self.car.parking_spot]:
-            simulation.state.cables[i].add_charge(-ct.CHARGING_RATE, simulation.time)
-            
+        simulation.state.add_charge(self.car.parking_spot, -ct.CHARGING_RATE)
         simulation.events.put((max(simulation.time, self.car.planned_departure), next(unique), Departure(self.car)))
 
 class Departure(CarEvent):
