@@ -1,2 +1,7 @@
 exercises/
 *.pdf
+Data/arrival_hours.csv
+Data/connection_time.csv
+Data/solar.xlsx
+Data/solar.xlsx
+Data/charging_volume.csv
