@@ -5,3 +5,5 @@ Data/connection_time.csv
 Data/solar.xlsx
 Data/solar.xlsx
 Data/charging_volume.csv
+Data/
+__pycache__
