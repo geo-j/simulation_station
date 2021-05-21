@@ -36,13 +36,13 @@ class PriceDrivenChargingStrategy(ChargingStrategy):
 
         for i in range(len(ct.PRICE_PER_KWH)): # each possible end time
             # bit of a hack: add and then modulo to prevent underflow
-            start_time = ((24 * 3600) + time + hour_frame_time - (time % hour_frame_time) + i * hour_frame_time - car.charging_time) % (24 * 3600)
+            start_time = ((24 * 3600) + time + hour_frame_time - (time % hour_frame_time) + i * hour_frame_time - car.charging_volume / ct.CHARGING_RATE) % (24 * 3600)
             cost = self.value_time(start_time, car)
             if cost < best[1] and self.valid_time(start_time, car):
                 best = (start_time, cost)
         
         # starting latest possible moment. no modulo needed as it should never be cheaper unless it is on first day
-        start_time = car.planned_departure - car.charging_time
+        start_time = car.planned_departure - car.charging_volume / ct.CHARGING_RATE
         cost = self.value_time(start_time, car)
         if cost < best[1] and self.valid_time(start_time, car):
             best = (start_time, cost)
@@ -55,7 +55,7 @@ class PriceDrivenChargingStrategy(ChargingStrategy):
         Calculates the cost for charging a car based on its desired starting time
         """
         current_time = start_time
-        time_left = car.charging_time
+        time_left = car.charging_volume / ct.CHARGING_RATE
 
         # the hour frame is calculated based on the start time (in seconds) converted into the hour of a 24-hour day
             # by dividing by 4, the hour frame is chosen as one of the [00:00 - 04:00], [04:00 - 08:00], [08:00 - 16:00], [16:00 - 20:00], [20:00 - 00:00], each with their own price range
@@ -79,14 +79,19 @@ class PriceDrivenChargingStrategy(ChargingStrategy):
 
 
     def valid_time(self, start_time, car:Car):
-        return (start_time + car.charging_time < car.planned_departure)
+        return (start_time + car.charging_volume / ct.CHARGING_RATE < car.planned_departure)
 
-class FCFSChargingStrategy(ChargingStrategy):
-    def __init__(self):
+class FCFSChargingStrategy(ChargingStrategy):    
+    def start_charge(self, time, car:Car):
+
+        return time
+
+    def find_car(self, time):
+        # return car - new charging rate
         pass
 
-    def start_charge(self, time, car):
-        return time
+    def change_charge(self):
+        pass
 
 class ELFSChargingStrategy(ChargingStrategy):
     def __init__(self):

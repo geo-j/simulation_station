@@ -5,9 +5,11 @@ This file contains the data structures of the simulation:
 """
 
 from queue import PriorityQueue, Queue
+from collections import deque
 import actors
 import constants as ct
 import strategies
+
 
 class State(object):
     """- load for each cable
@@ -54,7 +56,8 @@ class State(object):
              (2, self.cables[2], 1),
              (3, self.cables[3], 1)],
             [(4, self.cables[6], -1), # 10: Junction
-             (5, self.cables[7], 1)],
+             (5, self.cables[7], 1),
+             (6, self.cables[7], 1)],
             [(1, actors.Cable(0, 0), 1)], # 11: P1 Source
             [(2, actors.Cable(0, 0), 1)], # 12: P2 Source
             [(6, actors.Cable(0, 0), 1)], # 13: P6 Source
@@ -81,11 +84,17 @@ class State(object):
         self.n_no_space = 0     # # vehicles that couldn't park
         self.delays_sum = 0     # # total sum of the delays
         self.max_delay  = 0     # # maximum delay
+        self.parking_queues = [PriorityQueue() for _ in range(ct.N_PARKING_SPOTS)]
 
     def add_charge(self, parking_spot, charge):
-        print("Adding charge...")
+        # print("Adding charge...")
         self.cable_network[15 + parking_spot][0][1].max_flow += charge
+        print(f"Parking Spot {parking_spot + 1} needs {self.cable_network[15 + parking_spot][0][1].max_flow} charge")
+        # print(f'\t max flow: {self.cable_network[15 + parking_spot][0][1].max_flow}')
         self.calc_flow()
+        # for cable in self.cables:
+        # # if sim.state.time > 0:
+        #     print(f'Cable:\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / (float(self.time) + 1)}\n \tPercentage of Blackout: {100 * cable.blackout / (float(self.time) + 1)}\n')
 
     def add_energy(self, parking_spot, energy):
         # 1: 0
@@ -95,34 +104,69 @@ class State(object):
         self.cable_network[11 + parking_spot][0][1].max_flow += energy
         self.calc_flow()
 
+    def charge_possible(self, parking_spot, rate):
+        # print(parking_spot)
+        (cables, bottleneck) = self.bfs(22, parking_spot)
+        if(bottleneck == 0):
+            (cables, bottleneck) = self.bfs(0, parking_spot)
+
+        #print(bottleneck)
+        # use bottleneck < -1 when we don't have a proper sink or source...
+        if bottleneck < rate and bottleneck >= 0:
+            return False
+        
+        # assumes shortest path is always best
+        for i in range(len(cables)):
+            if cables[i][1].load + rate > cables[i][1].capacity:
+                return False
+            
+
+        return True
+
     def calc_flow(self):
-        #OPTIMISE
+        #OPTIMISE: call add_charge once per cable per calc_flow
         start = 22
-        second_start = 0
+        transformer = 0
         goal = 23
         
         for i in range(len(self.cable_network)):
             for j in range(len(self.cable_network[i])):
                 self.cable_network[i][j][1].add_charge(-self.cable_network[i][j][1].load, self.time)
 
+        for i in range(7):
+            print(self.cable_network[15 + i][0][1].max_flow)
+
+        # print("Bfs1")
         # Uses all solar energy
         (cables, bottleneck) = self.bfs(start, goal)
         while bottleneck > 0:
-            print(str(len(cables)))
+            # print(str(len(cables)))
             for i in range(len(cables)):
                 cables[i][1].add_charge(bottleneck * cables[i][2], self.time)
             
             (cables, bottleneck) = self.bfs(start, goal)
 
+        # print("Bfs2")
         # Uses transformer
-        (cables, bottleneck) = self.bfs(second_start, goal)
+        (cables, bottleneck) = self.bfs(transformer, goal)
+        while bottleneck > 0:
+            for i in range(len(cables)):
+                cables[i][1].add_charge(bottleneck * cables[i][2], self.time)
+                print("Load: " + str(self.cables[9].load))
+            
+            (cables, bottleneck) = self.bfs(transformer, goal)
+
+        # print("Bfs3")
+        # remove excess electricity
+        (cables, bottleneck) = self.bfs(start, transformer)
         while bottleneck > 0:
             for i in range(len(cables)):
                 cables[i][1].add_charge(bottleneck * cables[i][2], self.time)
             
-            (cables, bottleneck) = self.bfs(second_start, goal)
+            (cables, bottleneck) = self.bfs(start, transformer)
 
     def bfs(self, start, goal):
+        # print(f"{start} => {goal}")
         visited = [False] * len(self.cable_network)
         previous = [(-1, ())] * len(self.cable_network)
         bottleneck = [-1] * len(self.cable_network)
@@ -130,13 +174,17 @@ class State(object):
         queue.put(start)
 
         def visit(vertex):
-            # print("Visiting " + str(vertex))
+            print(f"Visited vertex: {vertex}")
             if vertex == goal:
+                # print("FOUND PATH!")
                 path = []
                 backtracking = previous[goal]
                 while backtracking[0] >= 0:
+                    print(backtracking[1])
                     path.append(backtracking[1])
                     backtracking = previous[backtracking[0]]
+                    
+                print(" ")
                 return (path, bottleneck[goal])
 
             visited[vertex] = True
@@ -157,23 +205,23 @@ class State(object):
 
         while(not queue.empty()):
             result = visit(queue.get())
-            if (result[1] > 0):
+            if (result[1] != 0):
                 return result
         
+        print("nope...")
         return ([], 0)
         
-
-    
     def __str__(self):
         return f'State:\n \tParking Spots in Use: {self.parking_spots_used}\n \tTotal # of Vehicles: {self.n_vehicles}\n \tTotal # of Delayed Vehicles: {self.n_delays}\n \tTotal # of Vehicles that Couldn\'t Park: {self.n_no_space}\n \tTotal Amount of Delay: {self.delays_sum}\n \tMax Delay: {self.max_delay}\n\n'
 
         # print('\tCables:')
         # print(cable for cable in self.cables)
 
-
 class Simulation(object):
     def __init__(self):
-        self.time = 0
-        self.state = State(self.time)
+        # self.time = 0
+        self.state = State(time = 0)
         self.events = PriorityQueue()
-        self.strategy = strategies.PriceDrivenChargingStrategy()
+        self.strategy = strategies.FCFSChargingStrategy()
+        self.solar_availability_factors = []
+        self.solar_revenue = 0

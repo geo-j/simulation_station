@@ -3,14 +3,17 @@ This file contains the classes referring to the variable 'actors' of the simulat
 """
 
 class Car(object):
-    def __init__(self, arrival_hour, connection_time, charging_time, charging_volume):
+    def __init__(self, arrival_hour, connection_time, charging_volume):
         self.arrival_hour = arrival_hour
         self.connection_time = connection_time
-        self.charging_time = charging_time
         self.planned_departure = arrival_hour + connection_time
         self.charging_volume = charging_volume
         self.charging_rate = 0
         self.parking_spot = -1    # not parked yet
+        self.started_charging = -1
+    
+    def __str__(self):
+        return f'Car arrived at {self.arrival_hour}'
 
 class Cable(object):
     def __init__(self, capacity, max_flow):
@@ -24,25 +27,43 @@ class Cable(object):
         self.loads = [(0, 0)]   # (time, load)
 
     def add_charge(self, charge:int, time):
+        
         # MAKE SURE IT CAN BECOME NEGATIVE
+        # assumes no jumps of over 400 lol
+
         old_load = self.load
         self.load += charge
         self.loads.append([time, self.load])
 
-        print("Old Load: " + str(old_load))
-        print("New Load: " + str(self.load))
+        # if not (old_load == 0 and self.load == 0):
+            # print(f"{old_load} => {self.load}")
+
+        # print("Old Load: " + str(old_load))
+        # print("New Load: " + str(self.load))
         
-        if old_load < self.capacity and self.load > self.capacity:
+        if abs(old_load) < self.capacity and abs(self.load) > self.capacity:
+            print("entered overload")
+            print(self.overload)
             self.overload -= time
+            print(self.overload)
 
-        if old_load > self.capacity and self.load < self.capacity:
+        if abs(old_load) > self.capacity and abs(self.load) < self.capacity:
+            print("exit overload")
+            print(self.overload)
             self.overload += time
+            print(self.overload)
 
-        if old_load < self.capacity * 1.1 and self.load > self.capacity * 1.1:
+        if abs(old_load) < self.capacity * 1.1 and abs(self.load) > self.capacity * 1.1:
+            print("entered blackout")
+            print(self.blackout)
             self.blackout -= time
+            print(self.blackout)
 
-        if old_load > self.capacity * 1.1 and self.load < self.capacity * 1.1:
+        if abs(old_load) > self.capacity * 1.1 and abs(self.load) < self.capacity * 1.1:
+            print("exit blackout")
+            print(self.blackout)
             self.blackout += time
+            print(self.blackout)
         
         # print("Cable has load: " + str(self.load))
     

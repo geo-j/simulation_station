@@ -3,12 +3,13 @@ This file contains the constants used throughout the project
 """
 
 
-N_DAYS = 7
+N_DAYS = 1
 FRAME = 3600    # 1 unit of time = 1s
 PARKING_CHECKS = 3
 CHARGING_RATE = 6
 
 CABLE_CAPACITY = 200
+SOLAR_PANEL_CAPACITY = 200
 TRANSFORMER_CAPACITY = 1000
 
 # 0 = transformer
@@ -26,7 +27,7 @@ SOLAR_PANELS = [
 ]
  
 
-N_CARS = 750
+N_CARS = 5
 N_PARKING_SPOTS = 7
 PARKING_SPOTS = [60, 80, 60, 70, 60, 60, 50]
 PARKING_PREFERENCE = [0.15, 0.15, 0.15, 0.20, 0.15, 0.10, 0.10]
