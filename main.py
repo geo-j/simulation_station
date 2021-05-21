@@ -14,6 +14,7 @@ unique = count()
 sim = simulation.Simulation()
 
 def init():
+    global sim
     arrival_hours = []
     connection_times = []
     charging_volumes = []
@@ -27,11 +28,14 @@ def init():
     with open('Data/charging_volume.csv', 'r') as f:
         charging_volumes = [float(line.strip().split(';')[1].replace(',', '.')) for line in f if 'Charging' not in line]
         charging_volumes = [volume / sum(charging_volumes) for volume in charging_volumes]      # normalise charging probabilities
+    
+    with open('Data/solar.csv', 'r') as f:
+        sim.solar_availability_factor = [tuple(map(float, line.strip().split(',')[1:])) for line in f if 'AVG' not in line]
 
     for _ in range(ct.N_DAYS):
         # TODO: generate connection_time such that connection_time * 0.7 > charging_time
         n_cars = int(np.random.poisson(lam = ct.N_CARS))
-        print(n_cars)
+        # print(n_cars)
         
         for i in range(n_cars):
             charging_volume = np.random.choice(a = len(charging_volumes), p = charging_volumes)
@@ -43,8 +47,7 @@ def init():
 
             sim.events.put((arrival_hour, next(unique), 
                         e.Arrival(actors.Car(arrival_hour = arrival_hour,    
-                            connection_time = connection_time,                  
-                            charging_time   = charging_time,
+                            connection_time = connection_time,   
                             charging_volume = charging_volume))))
     
 
@@ -53,11 +56,14 @@ if __name__ == '__main__':
     while not sim.events.empty():
         event_info = sim.events.get()
         sim.state.time = event_info[0]
+        # print(sim.state.time)
         event = event_info[2]
         event.event_handler(sim)
 
+    i = 0
     for cable in sim.state.cables:
         # if sim.state.time > 0:
-        print(f'Cable:\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / float(sim.state.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.state.time)}\n')
+        print(f'Cable: {i}\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / float(sim.state.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.state.time)}\n')
+        i += 1
     print(sim.state)
 
