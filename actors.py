@@ -42,28 +42,20 @@ class Cable(object):
         # print("New Load: " + str(self.load))
         
         if abs(old_load) < self.capacity and abs(self.load) > self.capacity:
-            print("entered overload")
-            print(self.overload)
+            # print("entered overload")
             self.overload -= time
-            print(self.overload)
 
         if abs(old_load) > self.capacity and abs(self.load) < self.capacity:
-            print("exit overload")
-            print(self.overload)
+            # print("exit overload")
             self.overload += time
-            print(self.overload)
 
         if abs(old_load) < self.capacity * 1.1 and abs(self.load) > self.capacity * 1.1:
-            print("entered blackout")
-            print(self.blackout)
+            # print("entered blackout")
             self.blackout -= time
-            print(self.blackout)
 
         if abs(old_load) > self.capacity * 1.1 and abs(self.load) < self.capacity * 1.1:
-            print("exit blackout")
-            print(self.blackout)
+            # print("exit blackout")
             self.blackout += time
-            print(self.blackout)
         
         # print("Cable has load: " + str(self.load))
     

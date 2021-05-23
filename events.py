@@ -70,12 +70,12 @@ class StartCharging(CarEvent):
     def event_handler(self, simulation):
         # print(simulation.state.charge_possible(self.car.parking_spot + 1, ct.CHARGING_RATE))
         if simulation.state.charge_possible(self.car.parking_spot + 1, ct.CHARGING_RATE):
-            print(f"Charging at {self.car.parking_spot + 1}")
+            # print(f"Charging at {self.car.parking_spot + 1}")
             self.car.started_charging = simulation.state.time
             simulation.state.add_charge(self.car.parking_spot, ct.CHARGING_RATE)
             self.car.charging_rate = ct.CHARGING_RATE
             simulation.events.put((simulation.state.time + 3600 * self.car.charging_volume / self.car.charging_rate, next(unique), StopCharging(self.car)))
-            print()
+            # print()
         else:
             simulation.state.parking_queues[self.car.parking_spot].put((self.car.arrival_hour, next(unique), self.car))
         # check if a car needs to start / stop charging
@@ -84,7 +84,7 @@ class StopCharging(CarEvent):
     def event_handler(self, simulation):
         # print(str(self.car.charging_volume) + ", " + str(self.car.charging_rate * (simulation.state.time - self.car.started_charging)))
         if self.car.charging_volume <= round(self.car.charging_rate * (simulation.state.time - self.car.started_charging), 4):
-            print(f"Finish charging at {self.car.parking_spot + 1}")
+            # print(f"Finish charging at {self.car.parking_spot + 1}")
             simulation.state.add_charge(self.car.parking_spot, -ct.CHARGING_RATE)
             simulation.events.put((max(simulation.state.time, self.car.planned_departure), next(unique), Departure(self.car)))
         

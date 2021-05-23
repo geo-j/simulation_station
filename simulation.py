@@ -89,7 +89,7 @@ class State(object):
     def add_charge(self, parking_spot, charge):
         # print("Adding charge...")
         self.cable_network[15 + parking_spot][0][1].max_flow += charge
-        print(f"Parking Spot {parking_spot + 1} needs {self.cable_network[15 + parking_spot][0][1].max_flow} charge")
+        # print(f"Parking Spot {parking_spot + 1} needs {self.cable_network[15 + parking_spot][0][1].max_flow} charge")
         # print(f'\t max flow: {self.cable_network[15 + parking_spot][0][1].max_flow}')
         self.calc_flow()
         # for cable in self.cables:
@@ -105,6 +105,7 @@ class State(object):
         self.calc_flow()
 
     def charge_possible(self, parking_spot, rate):
+        # return True to test if overload is allowed
         # print(parking_spot)
         (cables, bottleneck) = self.bfs(22, parking_spot)
         if(bottleneck == 0):
@@ -120,7 +121,6 @@ class State(object):
             if cables[i][1].load + rate > cables[i][1].capacity:
                 return False
             
-
         return True
 
     def calc_flow(self):
@@ -133,8 +133,10 @@ class State(object):
             for j in range(len(self.cable_network[i])):
                 self.cable_network[i][j][1].add_charge(-self.cable_network[i][j][1].load, self.time)
 
-        for i in range(7):
-            print(self.cable_network[15 + i][0][1].max_flow)
+        # (f"Start Load: {self.cables[9].load} at {self.cables[9]}")
+
+        # for i in range(7):
+            # print(f"{i + 1}: {self.cable_network[15 + i][0][1].max_flow}")
 
         # print("Bfs1")
         # Uses all solar energy
@@ -143,6 +145,9 @@ class State(object):
             # print(str(len(cables)))
             for i in range(len(cables)):
                 cables[i][1].add_charge(bottleneck * cables[i][2], self.time)
+                # print(f"Hi2: {cables[i]}")
+                # if(cables[i][1] == self.cables[9]):
+                    # print(f"New Load: {self.cables[9].load}")
             
             (cables, bottleneck) = self.bfs(start, goal)
 
@@ -151,8 +156,10 @@ class State(object):
         (cables, bottleneck) = self.bfs(transformer, goal)
         while bottleneck > 0:
             for i in range(len(cables)):
+                # print(f"Hi1: {cables[i]}")
                 cables[i][1].add_charge(bottleneck * cables[i][2], self.time)
-                print("Load: " + str(self.cables[9].load))
+                # if(cables[i][1] == self.cables[9]):
+                    # print(f"New Load: {self.cables[9].load}")
             
             (cables, bottleneck) = self.bfs(transformer, goal)
 
@@ -162,8 +169,13 @@ class State(object):
         while bottleneck > 0:
             for i in range(len(cables)):
                 cables[i][1].add_charge(bottleneck * cables[i][2], self.time)
+                # print(f"Hi3: {cables[i]}")
+                # if(cables[i][1] == self.cables[9]):
+                    # print(f"New Load: {self.cables[9].load}")
             
             (cables, bottleneck) = self.bfs(start, transformer)
+
+        # print(f"Load: {self.cables[9].load}.")
 
     def bfs(self, start, goal):
         # print(f"{start} => {goal}")
@@ -174,17 +186,16 @@ class State(object):
         queue.put(start)
 
         def visit(vertex):
-            print(f"Visited vertex: {vertex}")
+            # print(f"Visited vertex: {vertex}")
             if vertex == goal:
                 # print("FOUND PATH!")
                 path = []
                 backtracking = previous[goal]
                 while backtracking[0] >= 0:
-                    print(backtracking[1])
+                    # print(f"Hello: {backtracking[1]} has {backtracking[1][1].max_flow}")
                     path.append(backtracking[1])
                     backtracking = previous[backtracking[0]]
-                    
-                print(" ")
+                # print(f"Bottleneck: {bottleneck[goal]}")
                 return (path, bottleneck[goal])
 
             visited[vertex] = True
@@ -196,9 +207,12 @@ class State(object):
                     # print("Max: " + str(cable.max_flow))
                     queue.put(target)
                     previous[target] = (vertex, self.cable_network[vertex][i])
-                    if bottleneck[target] < 0:
+                    if cable.max_flow < 0:
+                        bottleneck[target] = bottleneck[vertex]
+                    elif bottleneck[vertex] < 0:
                         bottleneck[target] = cable.max_flow - cable.load
                     else:
+                        # print(f"test: {cable.max_flow - cable.load}, {bottleneck[target]}")
                         bottleneck[target] = min(bottleneck[vertex], cable.max_flow - cable.load)
 
             return ([], 0)
@@ -208,7 +222,6 @@ class State(object):
             if (result[1] != 0):
                 return result
         
-        print("nope...")
         return ([], 0)
         
     def __str__(self):

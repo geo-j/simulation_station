@@ -43,7 +43,6 @@ def init():
             connection_time = max(np.random.choice(a = len(connection_times), p = connection_times) * ct.FRAME + (ct.FRAME * np.random.default_rng().random()), charging_time / 0.7) # generate a connection time from the aggregate interval, and add a generated subunit of hour 
             arrival_hour = i * 24 * ct.FRAME + np.random.choice(a = len(arrival_hours), p = arrival_hours) * ct.FRAME + (ct.FRAME * np.random.default_rng().random())                        # generate increasing arrival times for each of the N_DAYS
 
-            print(charging_time / 3600)
             sim.events.put((arrival_hour, next(unique), 
                         e.Arrival(actors.Car(arrival_hour = arrival_hour,    
                             connection_time = connection_time,   
@@ -63,11 +62,10 @@ if __name__ == '__main__':
         event.event_handler(sim)
 
 
-        i = 0
-        for cable in sim.state.cables:
-            # if sim.state.time > 0:
-            if cable.load > 20:
-                print(f'Cable: {i}\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / float(sim.state.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.state.time)}\n')
-            i += 1
+    i = 0
+    for cable in sim.state.cables:
+        # if sim.state.time > 0:
+        print(f'Cable: {i}\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / float(sim.state.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.state.time)}\n')
+        i += 1
     print(sim.state)
 
