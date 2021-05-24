@@ -48,8 +48,8 @@ def init():
                             connection_time = connection_time,   
                             charging_volume = charging_volume))))
         
-        # for h in range(24):
-        #     sim.events.put((h, next(unique), e.ChangeSolarEnergy()))
+        for h in range(24):
+            sim.events.put((h, next(unique), e.ChangeSolarEnergy()))
     
 
 if __name__ == '__main__':
@@ -62,10 +62,10 @@ if __name__ == '__main__':
         event.event_handler(sim)
 
 
-    i = 0
-    for cable in sim.state.cables:
-        # if sim.state.time > 0:
-        print(f'Cable: {i}\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / float(sim.state.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.state.time)}\n')
-        i += 1
+        i = 0
+        for cable in sim.state.cables:
+            if sim.state.time > 0 and cable.overload > 0:
+                print(f'Cable: {i}\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / float(sim.state.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.state.time)}\n')
+            i += 1
     print(sim.state)
 
