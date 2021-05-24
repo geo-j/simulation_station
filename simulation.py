@@ -4,8 +4,7 @@ This file contains the data structures of the simulation:
 - State: class containing all the state properties
 """
 
-from queue import PriorityQueue, Queue
-from collections import deque
+from queue import PriorityQueue, Queue, LifoQueue
 import actors
 import constants as ct
 import strategies
@@ -78,6 +77,7 @@ class State(object):
         ]
  
         # , Cable(TRANSFORMER_CAPACITY)]
+        self.n_vehicles_start = 0
         self.parking_spots_used = [0] * ct.N_PARKING_SPOTS
         self.n_vehicles = 0     # # total vehicles
         self.n_delays   = 0     # # total amount of delayed cars
@@ -85,6 +85,10 @@ class State(object):
         self.delays_sum = 0     # # total sum of the delays
         self.max_delay  = 0     # # maximum delay
         self.parking_queues = [PriorityQueue() for _ in range(ct.N_PARKING_SPOTS)]
+        self.charging_cars = [LifoQueue() for _ in range(ct.N_PARKING_SPOTS)]
+        # self.preempted_cars = [LifoQueue() for _ in range(ct.N_PARKING_SPOTS)]
+
+
 
     def add_charge(self, parking_spot, charge):
         # print("Adding charge...")
@@ -104,6 +108,19 @@ class State(object):
         self.cable_network[11 + parking_spot][0][1].max_flow += energy
         self.calc_flow()
 
+    def causes_overload(self, parking_spot):
+        # return True to test if overload is allowed
+        # print(parking_spot)
+        sources = [11, 12, 13, 14, 0]
+
+        for source in sources:
+            (cables, bottleneck) = self.bfs(source, parking_spot)
+            for i in range(len(cables)):
+                if (cables[i][1].load * cables[i][2] > 0 ) and abs(cables[i][1].load) > cables[i][1].capacity:
+                    return True
+            
+        return False
+
     def charge_possible(self, parking_spot, rate):
         # return True to test if overload is allowed
         # print(parking_spot)
@@ -118,7 +135,7 @@ class State(object):
         
         # assumes shortest path is always best
         for i in range(len(cables)):
-            if cables[i][1].load + rate > cables[i][1].capacity:
+            if abs(cables[i][1].load) + rate > cables[i][1].capacity:
                 return False
             
         return True

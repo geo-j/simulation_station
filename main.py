@@ -6,6 +6,7 @@ import simulation
 import actors
 import constants as ct
 import events as e
+import strategies as s
 
 import numpy as np
 from itertools import count
@@ -48,24 +49,29 @@ def init():
                             connection_time = connection_time,   
                             charging_volume = charging_volume))))
         
-        for h in range(24):
-            sim.events.put((h, next(unique), e.ChangeSolarEnergy()))
+        if type(sim.strategy) is not s.BaseChargingStrategy and type(sim.strategy) is not s.PriceDrivenChargingStrategy:
+            for h in range(24):
+                sim.events.put((h * ct.FRAME + ct.FRAME * i * 24, next(unique), e.ChangeSolarEnergy()))
+
+    sim.events.put(((ct.N_DAYS - ct.N_END) * 24 * 3600, next(unique), e.StopTracking()))
     
 
 if __name__ == '__main__':
+    print("hi")
     init()
+    print("bye")
     while not sim.events.empty():
         event_info = sim.events.get()
         sim.state.time = event_info[0]
         # print(sim.state.time)
         event = event_info[2]
+        print(event, sim.state.time)
         event.event_handler(sim)
 
-
-        i = 0
-        for cable in sim.state.cables:
-            if sim.state.time > 0 and cable.overload > 0:
-                print(f'Cable: {i}\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / float(sim.state.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.state.time)}\n')
-            i += 1
-    print(sim.state)
+    # i = 0
+    # for cable in sim.state.cables:
+    #    # if sim.state.time > 0 and cable.overload > 0:
+    #    print(f'Cable: {i}\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / float(sim.state.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(sim.state.time)}\n')
+    #    i += 1
+    # print(sim.state)
 

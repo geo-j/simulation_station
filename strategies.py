@@ -83,7 +83,6 @@ class PriceDrivenChargingStrategy(ChargingStrategy):
 
 class FCFSChargingStrategy(ChargingStrategy):    
     def start_charge(self, time, car:Car):
-
         return time
 
     def find_car(self, time):
@@ -98,4 +97,4 @@ class ELFSChargingStrategy(ChargingStrategy):
         pass
 
     def start_charge(self, time, car):
-        return time
+        return car.planned_departure - car.charging_volume / ct.CHARGING_RATE

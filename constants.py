@@ -2,8 +2,16 @@
 This file contains the constants used throughout the project
 """
 
-
 N_DAYS = 1
+
+ARRIVALS = 0
+STARTS = 0
+CHANGES = 0
+STOPS = 0
+DEPARTURES = 0
+
+N_CARS = 5
+N_END = -100000
 FRAME = 3600    # 1 unit of time = 1s
 PARKING_CHECKS = 3
 CHARGING_RATE = 6
@@ -28,7 +36,6 @@ SOLAR_PANELS = [
 
 SEASON = 0 # 0 = winter, 1 = summer
 
-N_CARS = 750
 N_PARKING_SPOTS = 7
 PARKING_SPOTS = [60, 80, 60, 70, 60, 60, 50]
 PARKING_PREFERENCE = [0.15, 0.15, 0.15, 0.20, 0.15, 0.10, 0.10]
