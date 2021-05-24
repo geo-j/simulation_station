@@ -25,7 +25,8 @@ SOLAR_PANELS = [
     (0, [0, 1, 5, 6]),
     (1, [0, 1, 5, 6])
 ]
- 
+
+SEASON = 0 # 0 = winter, 1 = summer
 
 N_CARS = 750
 N_PARKING_SPOTS = 7
