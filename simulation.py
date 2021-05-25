@@ -128,7 +128,7 @@ class State(object):
             (cables, bottleneck) = self.bfs(source, parking_spot)
             for i in range(len(cables)):
                 if (cables[i][1].load * cables[i][2] > 0 ) and cables[i][1].capacity != 0 and abs(cables[i][1].load) > cables[i][1].capacity:
-                    print(f"Cable: {cables[i]} with {cables[i][1].load} and direction {cables[i][2]} > 0 and {abs(cables[i][1].load)} > {cables[i][1].capacity}")
+                    # print(f"Cable: {cables[i]} with {cables[i][1].load} and direction {cables[i][2]} > 0 and {abs(cables[i][1].load)} > {cables[i][1].capacity}")
                     return True
             
         return False
