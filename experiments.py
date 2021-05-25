@@ -18,21 +18,25 @@ def run_sim(strategy):
         if type(event) is StopTracking:
             with open(f'Results/{strategy.__name__}/{strategy.__name__}_{ct.SCENARIO}.csv', 'a') as f:
                 writer = csv.writer(f)
+                # n_vehicles,percentage_delays,avg_delay,max_delay,n_no_space
                 writer.writerow((sim.state.n_vehicles, sim.state.n_delays / sim.state.n_vehicles ,sim.state.delays_sum / sim.state.n_vehicles / 3600 ,sim.state.max_delay / 3600, sim.state.n_no_space))
 
             i = 0
             for cable in sim.state.cables:
                 with open(f'Results/{strategy.__name__}/{strategy.__name__}_cables_{ct.SCENARIO}.csv', 'a') as f:
                     writer = csv.writer(f)
-                    writer.writerow((100 * cable.overload / (float(sim.state.time) + 1), 100 * cable.blackout / (float(sim.state.time) + 1)))
+                    # max_load, % overload, % blackout
+                    writer.writerow((max(cable.loads, key = lambda l: l[1])[1], 100 * cable.overload / (float(sim.state.time) + 1), 100 * cable.blackout / (float(sim.state.time) + 1)))
                 i += 1
         i = 0
-        for cable in sim.state.cables:
-            with open(f'Results/{strategy.__name__}/{strategy.__name__}_cable_{i}_{ct.SCENARIO}.csv', 'a') as f:
-                writer = csv.writer(f)
-                writer.writerow((sim.state.time, cable.load))
-            i += 1
         event.event_handler(sim)
+
+    for cable in sim.state.cables:
+        with open(f'Results/{strategy.__name__}/{strategy.__name__}_cable_{i}_{ct.SCENARIO}.csv', 'a') as f:
+            writer = csv.writer(f)
+            # time, load
+            writer.writerows(cable.loads)
+        i += 1
 
 if __name__ == '__main__':
     for strategy in [s.BaseChargingStrategy, s.PriceDrivenChargingStrategy]:            
