@@ -146,7 +146,7 @@ class State(object):
             return False
         
         for i in range(len(cables)):
-            if abs(cables[i][1].load) + rate > cables[i][1].capacity:
+            if cables[i][1].load * cables[i][2] + rate > cables[i][1].capacity:
                 # print(cables[i])
                 # print(f"Cable {i} caused overload: {cables[i][1].load} + {rate} > {cables[i][1].capacity}")
                 return False
