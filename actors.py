@@ -13,8 +13,8 @@ class Car(object):
         self.parking_spot = -1    # not parked yet
         self.started_charging = -1
     
-    def __str__(self):
-        return f'Car arrived at {self.arrival_hour}'
+    # def __str__(self):
+        # return f'Car arrived at {self.arrival_hour}'
 
     def  __eq__(self, T):
          if self.arrival_hour == T.arrival_hour and self.charging_volume == T.charging_volume and self.parking_spot == T.parking_spot:

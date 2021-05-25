@@ -2,7 +2,7 @@
 This file contains the constants used throughout the project
 """
 
-N_DAYS = 3
+N_DAYS = 7
 
 ARRIVALS = 0
 STARTS = 0
