@@ -174,8 +174,8 @@ class StopCharging(CarEvent):
         # round too?
         if self.car.charging_volume - 1/(float)(1000000) <= self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME:
 
-            print(f"Volume: {self.car.charging_volume}, Rate: {self.car.charging_rate}, Time: {simulation.state.time - self.car.started_charging}")
-            print(f"{self.car.charging_volume - 1/(float)(1000000)} <= {self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME}")
+            # print(f"Volume: {self.car.charging_volume}, Rate: {self.car.charging_rate}, Time: {simulation.state.time - self.car.started_charging}")
+            # print(f"{self.car.charging_volume - 1/(float)(1000000)} <= {self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME}")
             ct.STOPS += 1
             # print(f"Stops: {ct.STOPS}")
             # print(f"Finish charging at {self.car.parking_spot + 1}")
@@ -188,9 +188,9 @@ class StopCharging(CarEvent):
                 # take the first car that can charge from all the queues
             # if type(simulation.strategy) is not strategies.BaseChargingStrategy or type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             #     self.schedule_new_car(simulation)
-        else: 
-            print(f"Volume: {self.car.charging_volume}, Rate: {self.car.charging_rate}, Time: {simulation.state.time - self.car.started_charging}") 
-            print(f"REJECTED: {self.car.charging_volume - 1/(float)(1000000)} <= {self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME}")
+# else: 
+            # print(f"Volume: {self.car.charging_volume}, Rate: {self.car.charging_rate}, Time: {simulation.state.time - self.car.started_charging}") 
+            # print(f"REJECTED: {self.car.charging_volume - 1/(float)(1000000)} <= {self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME}")
 
         if type(simulation.strategy) is not strategies.BaseChargingStrategy and type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             simulation.events.put((simulation.state.time, next(unique), ChangeNetwork()))
