@@ -179,6 +179,7 @@ class StopCharging(CarEvent):
             ct.STOPS += 1
             # print(f"Stops: {ct.STOPS}")
             # print(f"Finish charging at {self.car.parking_spot + 1}")
+            self.car.charging_rate = 0
             simulation.state.add_charge(self.car.parking_spot, -ct.CHARGING_RATE)
             simulation.events.put((max(simulation.state.time, self.car.planned_departure), next(unique), Departure(self.car)))
         
