@@ -80,7 +80,7 @@ class Event(object):
 class StartTracking(Event):
     def event_handler(self, simulation: Simulation):
         simulation.state.n_vehicles_start = 0
-        for i in len(ct.N_PARKING_SPOTS):
+        for i in range(ct.N_PARKING_SPOTS):
             simulation.state.n_vehicles_start += simulation.state.parking_spots_used[i]
         
         # reset variables
@@ -101,7 +101,8 @@ class StartTracking(Event):
 
 class StopTracking(Event):
     def __init__(self):
-        print("Planned stop tracking")
+        # print("Planned stop tracking")
+        pass
     def event_handler(self, simulation: Simulation):
         i = 0
         for cable in simulation.state.cables:        
@@ -228,7 +229,7 @@ class StopCharging(CarEvent):
             self.car.charging_rate = 0
             simulation.state.add_charge(self.car.parking_spot, -ct.CHARGING_RATE)
             simulation.events.put((max(simulation.state.time, self.car.planned_departure), next(unique), Departure(self.car)))
-            # remove_charging_car(self.car, simulation.state.charging_cars[self.car.parking_spot])
+            remove_charging_car(self.car, simulation.state.charging_cars[self.car.parking_spot])
         # 
         
             # checking if another car can start charging
@@ -246,10 +247,10 @@ class StopCharging(CarEvent):
 
 class ChangeSolarEnergy(Event):
     def event_handler(self, simulation):
-        expected_revenue = ct.SOLAR_PANEL_CAPACITY * simulation.solar_availability_factors[round(simulation.state.time / 3600 % 24)][ct.SEASON]
+        expected_revenue = ct.SOLAR_PANEL_CAPACITY * simulation.solar_availability_factors[round(simulation.state.time / 3600 % 24)][ct.SOLAR_PANELS[ct.SCENARIO][0]]
         actual_revenue = np.random.normal(loc = expected_revenue, scale = 0.15 * expected_revenue)
         change = actual_revenue - simulation.solar_revenue
-        for parking_spot in range(ct.N_PARKING_SPOTS):
+        for parking_spot in ct.SOLAR_PANELS[ct.SCENARIO][1]:
             simulation.state.add_energy(parking_spot, change)
         simulation.solar_revenue = actual_revenue
         # check if a car needs to start / stop charging
@@ -298,10 +299,10 @@ class ChangeCharge(CarEvent):
         simulation.state.add_charge(self.car.parking_spot, self.change)
         self.car.started_charging = simulation.state.time
         if self.car.charging_rate > 0:
-            print("AEVENT")
+            # print("AEVENT")
             simulation.events.put((simulation.state.time + ct.FRAME * self.car.charging_volume / self.car.charging_rate, next(unique), StopCharging(self.car)))
         else:
-            print("BEVENT")
+            # print("BEVENT")
             simulation.events.put((simulation.state.time, next(unique), StartCharging(self.car)))
 
         if type(simulation.strategy) is not strategies.BaseChargingStrategy and type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
