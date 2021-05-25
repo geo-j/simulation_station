@@ -26,8 +26,8 @@ class Event(object):
             if not simulation.state.parking_queues[parking_lot].empty():
                 curr_car = simulation.state.parking_queues[parking_lot].get(False)[2]
                 # take first car that can be charged
-                print("Checking Charge...")
-                print(simulation.state.charge_possible(curr_car.parking_spot + 1, ct.CHARGING_RATE))
+                # print("Checking Charge...")
+                # print(simulation.state.charge_possible(curr_car.parking_spot + 1, ct.CHARGING_RATE))
                 if  simulation.state.charge_possible(curr_car.parking_spot + 1, ct.CHARGING_RATE):
                     # print(f'Charge possible at {curr_car.parking_spot + 1}')
                     scheduled_car = curr_car

@@ -101,11 +101,21 @@ class State(object):
         #     print(f'Cable:\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / (float(self.time) + 1)}\n \tPercentage of Blackout: {100 * cable.blackout / (float(self.time) + 1)}\n')
 
     def add_energy(self, parking_spot, energy):
+        # give index 0...6
         # 1: 0
         # 2: 1
         # 6: 2
         # 7: 3
-        self.cable_network[11 + parking_spot][0][1].max_flow += energy
+        index = parking_spot
+        if(parking_spot >= 2 and parking_spot <= 5):
+            return
+        if(parking_spot > 5):
+            index -= 3
+        print(f"{energy} at spot {parking_spot + 1} so index {index}")
+        self.cable_network[11 + index][0][1].max_flow += energy
+        if self.cable_network[11 + index][0][1].max_flow < 1 / (float)(1000000):
+            self.cable_network[11 + index][0][1].max_flow = 0
+        print(f"New energy: {self.cable_network[11 + index][0][1].max_flow}")
         self.calc_flow()
 
     def causes_overload(self, parking_spot):
@@ -127,6 +137,7 @@ class State(object):
         (cables, bottleneck) = self.bfs(22, parking_spot)
         if(bottleneck == 0):
             (cables, bottleneck) = self.bfs(0, parking_spot)
+            # print("From transformer")
 
         # use bottleneck < -1 when we don't have a proper sink or source...
         # print(f"Bottleneck: {bottleneck}, Rate: {rate}")
@@ -135,6 +146,8 @@ class State(object):
         
         for i in range(len(cables)):
             if abs(cables[i][1].load * cables[i][2]) + rate > cables[i][1].capacity:
+                # print(cables[i])
+                # print(f"Cable {i} caused overload: {cables[i][1].load} + {rate} > {cables[i][1].capacity}")
                 return False
             
         return True
@@ -201,6 +214,8 @@ class State(object):
         queue = Queue()
         queue.put(start)
 
+        epsilon = 1 / (float)(1000000)
+
         def visit(vertex):
             # print(f"Visited vertex: {vertex}")
             if vertex == goal:
@@ -233,7 +248,6 @@ class State(object):
 
             return ([], 0)
 
-        epsilon = 1 / (float)(1000000)
         while(not queue.empty()):
             result = visit(queue.get())
             if (abs(result[1]) > epsilon):

@@ -65,7 +65,7 @@ if __name__ == '__main__':
         sim.state.time = event_info[0]
         # print(sim.state.time)
         event = event_info[2]
-        print(event, sim.state.time)
+        # print(event, sim.state.time)
         event.event_handler(sim)
 
     # i = 0
