@@ -12,7 +12,7 @@ import numpy as np
 from itertools import count
 unique = count()
 
-sim = simulation.Simulation(s.FCFSChargingStrategy())
+sim = simulation.Simulation(s.BaseChargingStrategy())
 
 def init(sim):
     arrival_hours = []

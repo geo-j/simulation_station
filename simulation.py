@@ -266,7 +266,7 @@ class State(object):
 
 class Simulation(object):
     def __init__(self, strategy):
-        # self.time = 0
+        self.start_time = 0
         self.state = State(time = 0)
         self.events = PriorityQueue()
         self.strategy = strategy

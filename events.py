@@ -84,6 +84,7 @@ class StartTracking(Event):
             simulation.state.n_vehicles_start += simulation.state.parking_spots_used[i]
         
         # reset variables
+        simulation.state.start_time = simulation.state.time
         simulation.state.n_delays = 0
         simulation.state.n_no_space = 0
         simulation.state.delays_sum = 0
@@ -106,11 +107,11 @@ class StopTracking(Event):
     def event_handler(self, simulation: Simulation):
         i = 0
         for cable in simulation.state.cables:        
-            if cable.capacity < cable.load:
+            if cable.load > cable.capacity:
                 cable.overload += simulation.state.time
-            if cable.capacity * 1.1 < cable.load:
-                cable.blackout += -simulation.state.time
-            print(f'Cable: {i}\n \t Current Load: {cable.load}\n \tPercentage of Overload: {100 * cable.overload / float(simulation.state.time)}\n \tPercentage of Blackout: {100 * cable.blackout / float(simulation.state.time)}\n')
+            if cable.load > cable.capacity * 1.1:
+                cable.blackout += simulation.state.time
+            print(f'Cable: {i}\n \t Current Load: {cable.load}\n \tPercentage of Overload {cable.overload}: {100 * cable.overload / float(simulation.state.time - simulation.state.start_time)}\n \tPercentage of Blackout {cable.blackout}: {100 * cable.blackout / float(simulation.state.time - simulation.state.start_time)}\n')
             i += 1  
         
         print(simulation.state)
