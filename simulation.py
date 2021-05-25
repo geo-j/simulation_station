@@ -107,15 +107,15 @@ class State(object):
         # 6: 2
         # 7: 3
         index = parking_spot
-        if(parking_spot >= 2 and parking_spot <= 5):
+        if(parking_spot >= 2 and parking_spot <= 4):
             return
         if(parking_spot > 5):
             index -= 3
-        print(f"{energy} at spot {parking_spot + 1} so index {index}")
+        # print(f"{energy} at spot {parking_spot + 1} so index {index}")
         self.cable_network[11 + index][0][1].max_flow += energy
         if self.cable_network[11 + index][0][1].max_flow < 1 / (float)(1000000):
             self.cable_network[11 + index][0][1].max_flow = 0
-        print(f"New energy: {self.cable_network[11 + index][0][1].max_flow}")
+        print(f"New energy: {self.cable_network[11 + index][0][1].max_flow} at spot {parking_spot + 1}")
         self.calc_flow()
 
     def causes_overload(self, parking_spot):
@@ -127,6 +127,7 @@ class State(object):
             (cables, bottleneck) = self.bfs(source, parking_spot)
             for i in range(len(cables)):
                 if (cables[i][1].load * cables[i][2] > 0 ) and abs(cables[i][1].load) > cables[i][1].capacity:
+                    print(f"Cable: {cables[i]} with {cables[i][1].load} and direction {cables[i][2]} > 0 and {abs(cables[i][1].load)} > {cables[i][1].capacity}")
                     return True
             
         return False
@@ -145,7 +146,7 @@ class State(object):
             return False
         
         for i in range(len(cables)):
-            if abs(cables[i][1].load * cables[i][2]) + rate > cables[i][1].capacity:
+            if abs(cables[i][1].load) + rate > cables[i][1].capacity:
                 # print(cables[i])
                 # print(f"Cable {i} caused overload: {cables[i][1].load} + {rate} > {cables[i][1].capacity}")
                 return False
@@ -233,7 +234,7 @@ class State(object):
             for i in range(len(self.cable_network[vertex])):
                 cable = self.cable_network[vertex][i][1]
                 target = self.cable_network[vertex][i][0]
-                if (not visited[target] and (cable.load < cable.max_flow or cable.max_flow < 0)):
+                if (not visited[target] and (abs(cable.load) < cable.max_flow or cable.max_flow < 0)):
                     # print("Load: " + str(cable.load))
                     # print("Max: " + str(cable.max_flow))
                     queue.put(target)
@@ -241,10 +242,10 @@ class State(object):
                     if cable.max_flow < 0:
                         bottleneck[target] = bottleneck[vertex]
                     elif bottleneck[vertex] < 0:
-                        bottleneck[target] = cable.max_flow - cable.load
+                        bottleneck[target] = cable.max_flow - abs(cable.load)
                     else:
                         # print(f"test: {cable.max_flow - cable.load}, {bottleneck[target]}")
-                        bottleneck[target] = min(bottleneck[vertex], cable.max_flow - cable.load)
+                        bottleneck[target] = min(bottleneck[vertex], cable.max_flow - abs(cable.load))
 
             return ([], 0)
 

@@ -10,7 +10,7 @@ CHANGES = 0
 STOPS = 0
 DEPARTURES = 0
 
-N_CARS = 750
+N_CARS = 10
 N_END = -100000
 FRAME = 3600    # 1 unit of time = 1s
 PARKING_CHECKS = 3
