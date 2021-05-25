@@ -4,6 +4,7 @@ This file contains the classes referring to the variable 'actors' of the simulat
 
 class Car(object):
     def __init__(self, arrival_hour, connection_time, charging_volume):
+        self.done_charging = False
         self.arrival_hour = arrival_hour
         self.connection_time = connection_time
         self.planned_departure = arrival_hour + connection_time

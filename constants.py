@@ -2,15 +2,16 @@
 This file contains the constants used throughout the project
 """
 
-N_DAYS = 5
+N_DAYS = 3
 
 ARRIVALS = 0
 STARTS = 0
 CHANGES = 0
 STOPS = 0
 DEPARTURES = 0
+REJECTS = 0
 
-N_CARS = 1000
+N_CARS = 750
 N_END = -100000
 FRAME = 3600    # 1 unit of time = 1s
 PARKING_CHECKS = 3
