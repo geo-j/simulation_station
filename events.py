@@ -20,15 +20,16 @@ class Event(object):
 
     def schedule_new_car(self, simulation:Simulation) -> bool:
         scheduled_car = None
-        print("")
+        # print("")
         for parking_lot in range(ct.N_PARKING_SPOTS):
-            print(simulation.state.parking_queues[parking_lot].qsize())
+            # print(simulation.state.parking_queues[parking_lot].qsize())
             if not simulation.state.parking_queues[parking_lot].empty():
                 curr_car = simulation.state.parking_queues[parking_lot].get(False)[2]
                 # take first car that can be charged
+                print("Checking Charge...")
                 print(simulation.state.charge_possible(curr_car.parking_spot + 1, ct.CHARGING_RATE))
                 if  simulation.state.charge_possible(curr_car.parking_spot + 1, ct.CHARGING_RATE):
-                    print(f'Charge possible at {curr_car.parking_spot + 1}')
+                    # print(f'Charge possible at {curr_car.parking_spot + 1}')
                     scheduled_car = curr_car
                     break
                 else:
@@ -190,7 +191,7 @@ class ChangeSolarEnergy(Event):
     def event_handler(self, simulation):
         expected_revenue = ct.SOLAR_PANEL_CAPACITY * simulation.solar_availability_factors[round(simulation.state.time / 3600 % 24)][ct.SEASON]
         actual_revenue = np.random.normal(loc = expected_revenue, scale = 0.15 * expected_revenue)
-        print(f'{actual_revenue}')
+        # print(f'{actual_revenue}')
         change = actual_revenue - simulation.solar_revenue
         for parking_spot in range(ct.N_PARKING_SPOTS):
             simulation.state.add_energy(parking_spot, change)
@@ -215,8 +216,8 @@ class ChangeNetwork(Event):
         if type(simulation.strategy) is not strategies.BaseChargingStrategy and type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             for parking_lot in range(ct.N_PARKING_SPOTS):
                 if simulation.state.causes_overload(parking_lot + 1):
-                    # if not simulation.state.charging_cars[parking_lot].empty():
-                        print(f"Preempting car at {parking_lot}")
+                    if not simulation.state.charging_cars[parking_lot].empty():
+                        # print(f"Preempting car at {parking_lot}")
                         car = simulation.state.charging_cars[parking_lot].get(False)[2]
                         simulation.events.put((simulation.state.time, next(unique), ChangeCharge(car, -ct.CHARGING_RATE)))
         

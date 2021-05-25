@@ -128,14 +128,13 @@ class State(object):
         if(bottleneck == 0):
             (cables, bottleneck) = self.bfs(0, parking_spot)
 
-        #print(bottleneck)
         # use bottleneck < -1 when we don't have a proper sink or source...
+        # print(f"Bottleneck: {bottleneck}, Rate: {rate}")
         if bottleneck < rate and bottleneck >= 0:
             return False
         
-        # assumes shortest path is always best
         for i in range(len(cables)):
-            if abs(cables[i][1].load) + rate > cables[i][1].capacity:
+            if abs(cables[i][1].load * cables[i][2]) + rate > cables[i][1].capacity:
                 return False
             
         return True
@@ -234,9 +233,10 @@ class State(object):
 
             return ([], 0)
 
+        epsilon = 1 / (float)(1000000)
         while(not queue.empty()):
             result = visit(queue.get())
-            if (result[1] != 0):
+            if (abs(result[1]) > epsilon):
                 return result
         
         return ([], 0)
