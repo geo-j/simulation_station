@@ -248,10 +248,10 @@ class State(object):
         # print(cable for cable in self.cables)
 
 class Simulation(object):
-    def __init__(self):
+    def __init__(self, strategy):
         # self.time = 0
         self.state = State(time = 0)
         self.events = PriorityQueue()
-        self.strategy = strategies.FCFSChargingStrategy()
+        self.strategy = strategy
         self.solar_availability_factors = []
         self.solar_revenue = 0

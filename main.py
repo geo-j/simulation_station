@@ -12,10 +12,9 @@ import numpy as np
 from itertools import count
 unique = count()
 
-sim = simulation.Simulation()
+sim = simulation.Simulation(s.FCFSChargingStrategy())
 
-def init():
-    global sim
+def init(sim):
     arrival_hours = []
     connection_times = []
     charging_volumes = []
@@ -58,7 +57,7 @@ def init():
 
 if __name__ == '__main__':
     print("hi")
-    init()
+    init(sim)
     print("bye")
     while not sim.events.empty():
         event_info = sim.events.get()
