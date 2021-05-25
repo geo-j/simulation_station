@@ -153,7 +153,8 @@ class StartCharging(CarEvent):
         if simulation.state.charge_possible(self.car.parking_spot + 1, ct.CHARGING_RATE) or type(simulation.strategy) is strategies.BaseChargingStrategy or type(simulation.strategy) is strategies.PriceDrivenChargingStrategy:
             # print(f"Charging at {self.car.parking_spot + 1}")
             ct.STARTS += 1
-            # print(f"Start: {ct.STARTS}")
+            
+            self.car.charging_volume -= self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME
             self.car.started_charging = simulation.state.time
             simulation.state.add_charge(self.car.parking_spot, ct.CHARGING_RATE)
             self.car.charging_rate = ct.CHARGING_RATE
@@ -169,8 +170,12 @@ class StartCharging(CarEvent):
 class StopCharging(CarEvent):
     def event_handler(self, simulation):
         # print(str(self.car.charging_volume) + ", " + str(self.car.charging_rate * (simulation.state.time - self.car.started_charging)))
-        if self.car.charging_volume <= round(self.car.charging_rate * (simulation.state.time - self.car.started_charging), 4):
-            
+        
+        # round too?
+        if self.car.charging_volume - 1/(float)(1000000) <= self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME:
+
+            print(f"Volume: {self.car.charging_volume}, Rate: {self.car.charging_rate}, Time: {simulation.state.time - self.car.started_charging}")
+            print(f"{self.car.charging_volume - 1/(float)(1000000)} <= {self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME}")
             ct.STOPS += 1
             # print(f"Stops: {ct.STOPS}")
             # print(f"Finish charging at {self.car.parking_spot + 1}")
@@ -182,6 +187,10 @@ class StopCharging(CarEvent):
                 # take the first car that can charge from all the queues
             # if type(simulation.strategy) is not strategies.BaseChargingStrategy or type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             #     self.schedule_new_car(simulation)
+        else: 
+            print(f"Volume: {self.car.charging_volume}, Rate: {self.car.charging_rate}, Time: {simulation.state.time - self.car.started_charging}") 
+            print(f"REJECTED: {self.car.charging_volume - 1/(float)(1000000)} <= {self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME}")
+
         if type(simulation.strategy) is not strategies.BaseChargingStrategy and type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             simulation.events.put((simulation.state.time, next(unique), ChangeNetwork()))
 
@@ -212,12 +221,11 @@ class ChangeNetwork(Event):
 
         # print("")
         # try to preempt cars
-        ct.CHANGES += 1
         if type(simulation.strategy) is not strategies.BaseChargingStrategy and type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             for parking_lot in range(ct.N_PARKING_SPOTS):
                 if simulation.state.causes_overload(parking_lot + 1):
-                    if not simulation.state.charging_cars[parking_lot].empty():
-                        # print(f"Preempting car at {parking_lot}")
+                    #if not simulation.state.charging_cars[parking_lot].empty():
+                        print(f"Preempting car at {parking_lot} with {simulation.state.parking_spots_used[parking_lot]} cars")
                         car = simulation.state.charging_cars[parking_lot].get(False)[2]
                         simulation.events.put((simulation.state.time, next(unique), ChangeCharge(car, -ct.CHARGING_RATE)))
         
@@ -235,6 +243,8 @@ class ChangeCharge(CarEvent):
         ct.CHANGES += 1
         # print(f"Changes: {ct.CHANGES}")
         self.car.charging_volume -= self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME
+        self.car.charging_rate += self.change
+        print(f"New Rate: {self.car.charging_rate}")
         simulation.state.add_charge(self.car.parking_spot, self.change)
         self.car.started_charging = simulation.state.time
         if self.car.charging_rate > 0:

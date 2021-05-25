@@ -115,7 +115,7 @@ class State(object):
         self.cable_network[11 + index][0][1].max_flow += energy
         if self.cable_network[11 + index][0][1].max_flow < 1 / (float)(1000000):
             self.cable_network[11 + index][0][1].max_flow = 0
-        print(f"New energy: {self.cable_network[11 + index][0][1].max_flow} at spot {parking_spot + 1}")
+        # print(f"New energy: {self.cable_network[11 + index][0][1].max_flow} at spot {parking_spot + 1}")
         self.calc_flow()
 
     def causes_overload(self, parking_spot):
