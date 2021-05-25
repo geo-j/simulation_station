@@ -15,6 +15,13 @@ class Car(object):
     def __str__(self):
         return f'Car arrived at {self.arrival_hour}'
 
+    def  __eq__(self, T):
+         if self.arrival_hour == T.arrival_hour and self.charging_volume == T.charging_volume and self.parking_spot == T.parking_spot:
+             return True
+         else:
+             return False
+
+
 class Cable(object):
     def __init__(self, capacity, max_flow):
         # max_flow = -1, for infinite maximum flow

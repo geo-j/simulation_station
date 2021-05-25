@@ -7,7 +7,7 @@ import constants as ct
 from simulation import Simulation
 from main import unique
 import strategies
-from copy import deepcopy
+from queue import LifoQueue
 
 import numpy as np
 
@@ -46,7 +46,6 @@ class Event(object):
 
 class StartTracking(Event):
     def event_handler(self, simulation: Simulation):
-        pass
         simulation.state.n_vehicles_start = 0
         for i in len(ct.N_PARKING_SPOTS):
             simulation.state.n_vehicles_start += simulation.state.parking_spots_used[i]
@@ -158,6 +157,8 @@ class StartCharging(CarEvent):
             self.car.started_charging = simulation.state.time
             simulation.state.add_charge(self.car.parking_spot, ct.CHARGING_RATE)
             self.car.charging_rate = ct.CHARGING_RATE
+            print(f'StartCharging schedule StopCharge at {self.car.parking_spot + 1}')
+
             simulation.events.put((simulation.state.time + ct.FRAME * self.car.charging_volume / self.car.charging_rate, next(unique), StopCharging(self.car)))
             simulation.state.charging_cars[self.car.parking_spot].put((self.car.arrival_hour, next(unique), self.car))
             # print()
@@ -167,20 +168,47 @@ class StartCharging(CarEvent):
         if type(simulation.strategy) is not strategies.BaseChargingStrategy and type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             simulation.events.put((simulation.state.time, next(unique), ChangeNetwork()))
 
+def remove_charging_car(car: Car, charging_cars: LifoQueue):
+    # print(f'\t remove charging car at {car.parking_spot + 1}')
+    tmp_stack = LifoQueue()
+    # if not charging_cars.empty():
+    # print(charging_cars.qsize())
+    curr_car = charging_cars.get(False)[2]
+    # print(f'\tFound car? {curr_car == car}')
+
+    while curr_car != car and not charging_cars.empty():
+        tmp_stack.put((curr_car.arrival_hour, next(unique), curr_car))
+        curr_car = charging_cars.get(False)[2]
+        # print(f'\tFound car? {curr_car == car}')
+
+    # print(f'\tFound car here? {curr_car == car}')
+
+    if charging_cars.empty() and curr_car != car:
+        print('here')
+        charging_cars.put((curr_car.arrival_hour, next(unique), curr_car))
+
+    # print(f'queue empty? {charging_cars.empty()}')
+    while not tmp_stack.empty():
+        car = tmp_stack.get(False)[2]
+        charging_cars.put((car.arrival_hour, next(unique), car))
+    # print(charging_cars.qsize())
+
+
 class StopCharging(CarEvent):
     def event_handler(self, simulation):
         # print(str(self.car.charging_volume) + ", " + str(self.car.charging_rate * (simulation.state.time - self.car.started_charging)))
         
         # round too?
-        if self.car.charging_volume - 1/(float)(1000000) <= self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME:
+        if self.car.charging_volume - 1/float(1000000) <= self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME:
 
             print(f"Volume: {self.car.charging_volume}, Rate: {self.car.charging_rate}, Time: {simulation.state.time - self.car.started_charging}")
-            print(f"{self.car.charging_volume - 1/(float)(1000000)} <= {self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME}")
+            print(f"{self.car.charging_volume - 1/float(1000000)} <= {self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME}")
             ct.STOPS += 1
             # print(f"Stops: {ct.STOPS}")
-            # print(f"Finish charging at {self.car.parking_spot + 1}")
+            print(f"Finish charging at {self.car.parking_spot + 1}")
             simulation.state.add_charge(self.car.parking_spot, -ct.CHARGING_RATE)
             simulation.events.put((max(simulation.state.time, self.car.planned_departure), next(unique), Departure(self.car)))
+            # remove_charging_car(self.car, simulation.state.charging_cars[self.car.parking_spot])
         
             # checking if another car can start charging
                 # check overload
@@ -224,10 +252,11 @@ class ChangeNetwork(Event):
         if type(simulation.strategy) is not strategies.BaseChargingStrategy and type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             for parking_lot in range(ct.N_PARKING_SPOTS):
                 if simulation.state.causes_overload(parking_lot + 1):
-                    #if not simulation.state.charging_cars[parking_lot].empty():
-                        print(f"Preempting car at {parking_lot} with {simulation.state.parking_spots_used[parking_lot]} cars")
-                        car = simulation.state.charging_cars[parking_lot].get(False)[2]
-                        simulation.events.put((simulation.state.time, next(unique), ChangeCharge(car, -ct.CHARGING_RATE)))
+                    # if not simulation.state.charging_cars[parking_lot].empty():
+                    print(f"Preempting car at {parking_lot}")
+                    car = simulation.state.charging_cars[parking_lot].get(False)[2]
+                    simulation.events.put((simulation.state.time, next(unique), ChangeCharge(car, -ct.CHARGING_RATE)))
+                    break   
         
         # try to schedule new cars
             self.schedule_new_car(simulation)
@@ -248,6 +277,7 @@ class ChangeCharge(CarEvent):
         simulation.state.add_charge(self.car.parking_spot, self.change)
         self.car.started_charging = simulation.state.time
         if self.car.charging_rate > 0:
+            print(f'ChangeCharge schedule StopCharge at {self.car.parking_spot + 1}')
             simulation.events.put((simulation.state.time + ct.FRAME * self.car.charging_volume / self.car.charging_rate, next(unique), StopCharging(self.car)))
         else:
             simulation.events.put((simulation.state.time, next(unique), StartCharging(self.car)))
@@ -258,6 +288,8 @@ class ChangeCharge(CarEvent):
         # check if a car needs to start / stop charging
 
 class Departure(CarEvent):
+    def __str__(self):
+        return f'car arrived at {self.car.arrival_hour} with charging volume {self.car.charging_volume} leaving from {self.car.parking_spot + 1}'
     def event_handler(self, simulation):
         # print(str(self.car.parking_spot + 1) + ": " + str(simulation.state.parking_spots_used[self.car.parking_spot]) + " -> " + str(simulation.state.parking_spots_used[self.car.parking_spot] - 1))
         simulation.state.parking_spots_used[self.car.parking_spot] -= 1
