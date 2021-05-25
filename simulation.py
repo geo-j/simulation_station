@@ -123,6 +123,7 @@ class State(object):
         # print(parking_spot)
         sources = [11, 12, 13, 14, 0]
 
+        # return False
         for source in sources:
             (cables, bottleneck) = self.bfs(source, parking_spot)
             for i in range(len(cables)):
@@ -135,6 +136,7 @@ class State(object):
     def charge_possible(self, parking_spot, rate):
         # return True to test if overload is allowed
         # print(parking_spot)
+        # return True
         (cables, bottleneck) = self.bfs(22, parking_spot)
         if(bottleneck == 0):
             (cables, bottleneck) = self.bfs(0, parking_spot)
