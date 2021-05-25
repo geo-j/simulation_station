@@ -2,7 +2,7 @@
 This file contains the constants used throughout the project
 """
 
-N_DAYS = 7
+N_DAYS = 1
 
 ARRIVALS = 0
 STARTS = 0
@@ -12,7 +12,8 @@ DEPARTURES = 0
 REJECTS = 0
 
 N_CARS = 750
-N_END = -100000
+N_END = 0
+N_BEGIN = 3600 * 24
 FRAME = 3600    # 1 unit of time = 1s
 PARKING_CHECKS = 3
 CHARGING_RATE = 6
@@ -27,8 +28,9 @@ TRANSFORMER_CAPACITY = 1000
 # 15-21 = parking spot sink
 # 22, 23, 24 = junctions
 
+SCENARIO = 0
 SOLAR_PANELS = [
-    (0, []),
+    # (0, []),
     (0, [5, 6]),
     (1, [5, 6]),
     (0, [0, 1, 5, 6]),
