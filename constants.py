@@ -2,7 +2,7 @@
 This file contains the constants used throughout the project
 """
 
-N_DAYS = 2
+N_DAYS = 90
 
 ARRIVALS = 0
 STARTS = 0
@@ -30,7 +30,7 @@ TRANSFORMER_CAPACITY = 1000
 
 SCENARIO = 0
 SOLAR_PANELS = [
-    # (0, []),
+    (0, []),
     (0, [5, 6]),
     (1, [5, 6]),
     (0, [0, 1, 5, 6]),
