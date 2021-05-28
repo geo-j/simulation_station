@@ -11,16 +11,17 @@ from queue import LifoQueue, PriorityQueue
 
 import numpy as np
 
-def remove_scheduled_car(car: Car, queued_cars: PriorityQueue):
+def remove_car(simulation, car: Car, queued_cars):
     # print(f'\t remove charging car at {car.parking_spot + 1}')
-    tmp_stack = PriorityQueue()
+    tmp_stack = type(queued_cars)()
+    # print(tmp_stack)
     # if not charging_cars.empty():
     # print(charging_cars.qsize())
     curr_car = queued_cars.get(False)[2]
     # print(f'\tFound car? {curr_car == car}')
 
     while curr_car != car and not queued_cars.empty():
-        tmp_stack.put((curr_car.arrival_hour, next(unique), curr_car))
+        tmp_stack.put((simulation.strategy.start_charge(simulation.state.time, curr_car), next(unique), curr_car))
         curr_car = queued_cars.get(False)[2]
         # print(f'\tFound car? {curr_car == car}')
 
@@ -28,12 +29,12 @@ def remove_scheduled_car(car: Car, queued_cars: PriorityQueue):
 
     if queued_cars.empty() and curr_car != car:
         print('here')
-        queued_cars.put((curr_car.arrival_hour, next(unique), curr_car))
+        queued_cars.put((simulation.strategy.start_charge(simulation.state.time, curr_car), next(unique), curr_car))
 
     # print(f'queue empty? {charging_cars.empty()}')
     while not tmp_stack.empty():
         car = tmp_stack.get(False)[2]
-        queued_cars.put((car.arrival_hour, next(unique), car))
+        queued_cars.put((simulation.strategy.start_charge(simulation.state.time, car), next(unique), car))
     # print(charging_cars.qsize())
 
 class Event(object):
@@ -61,16 +62,16 @@ class Event(object):
                 # take first car that can be charged
                 # print("Checking Charge...")
                 # print(f"Charge Possible1: {simulation.state.charge_possible(curr_car.parking_spot + 1, ct.CHARGING_RATE)}")
-                if  simulation.state.charge_possible(curr_car.parking_spot + 1, ct.CHARGING_RATE) and (scheduled_car is None or curr_car.arrival_hour < scheduled_car.arrival_hour):
+                if  simulation.state.charge_possible(curr_car.parking_spot + 1, ct.CHARGING_RATE) and (scheduled_car is None or simulation.strategy.start_charge(simulation.state.time, curr_car) < simulation.strategy.start_charge(simulation.state.time, scheduled_car)):
                     # print(f'Charge possible at {curr_car.parking_spot + 1}')
                     scheduled_car = curr_car
                 
-                simulation.state.parking_queues[parking_lot].put((curr_car.arrival_hour, next(unique), curr_car))
+                simulation.state.parking_queues[parking_lot].put((simulation.strategy.start_charge(simulation.state.time, curr_car), next(unique), curr_car))
 
         if scheduled_car is not None:
             # print(f'New car scheduled at {simulation.state.time}')
             simulation.events.put((simulation.state.time, next(unique), StartCharging(scheduled_car)))
-            remove_scheduled_car(scheduled_car, simulation.state.parking_queues[scheduled_car.parking_spot])
+            remove_car(simulation, scheduled_car, simulation.state.parking_queues[scheduled_car.parking_spot])
 
             # print("Charging new car")
             return True
@@ -130,18 +131,6 @@ class CarEvent(Event):
 
 
 class Arrival(CarEvent):
-    # def schedule_new_car(self, simulation: Simulation):
-    #     scheduled_car = None
-    #     for parking_lot in range(ct.N_PARKING_SPOTS):
-    #         if not simulation.state.parking_queues[parking_lot].empty():
-    #             curr_car = simulation.state.parking_queues[parking_lot].get(False)[2]
-    #             if  scheduled_car is None or curr_car.arrival_hour < scheduled_car.arrival_hour:
-    #                 scheduled_car = curr_car
-    #             else:
-    #                 simulation.state.parking_queues[parking_lot].put((curr_car.arrival_hour, next(unique), curr_car))
-
-    #     simulation.events.put((simulation.state.time, next(unique), StartCharging(scheduled_car)))
-
     def event_handler(self, simulation):
         parking_location = np.random.choice(a = len(ct.PARKING_PREFERENCE), size = ct.PARKING_CHECKS, replace = False, p = ct.PARKING_PREFERENCE)
         
@@ -163,7 +152,7 @@ class Arrival(CarEvent):
                 simulation.events.put((simulation.strategy.start_charge(simulation.state.time, self.car), next(unique), StartCharging(self.car)))
             else:   # if the car cannot be parked
                 # add car to parking spot queue
-                simulation.state.parking_queues[self.car.parking_spot].put((self.car.arrival_hour, next(unique), self.car))
+                simulation.state.parking_queues[self.car.parking_spot].put((simulation.strategy.start_charge(simulation.state.time, self.car), next(unique), self.car))
                 simulation.events.put((simulation.state.time, next(unique), ChangeNetwork()))
 
                 # schedule another car from the already existing queues
@@ -203,20 +192,20 @@ class StartCharging(CarEvent):
         if type(simulation.strategy) is not strategies.BaseChargingStrategy and type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             simulation.events.put((simulation.state.time, next(unique), ChangeNetwork()))
 
-def remove_charging_car(car: Car, charging_cars: LifoQueue):
-    tmp_stack = LifoQueue()
-    curr_car = charging_cars.get(False)[2]
+# def remove_charging_car(car: Car, charging_cars: LifoQueue):
+#     tmp_stack = LifoQueue()
+#     curr_car = charging_cars.get(False)[2]
 
-    while curr_car != car and not charging_cars.empty():
-        tmp_stack.put((curr_car.arrival_hour, next(unique), curr_car))
-        curr_car = charging_cars.get(False)[2]
+#     while curr_car != car and not charging_cars.empty():
+#         tmp_stack.put((curr_car.arrival_hour, next(unique), curr_car))
+#         curr_car = charging_cars.get(False)[2]
 
-    if charging_cars.empty() and curr_car != car:
-        charging_cars.put((curr_car.arrival_hour, next(unique), curr_car))
+#     if charging_cars.empty() and curr_car != car:
+#         charging_cars.put((curr_car.arrival_hour, next(unique), curr_car))
 
-    while not tmp_stack.empty():
-        car = tmp_stack.get(False)[2]
-        charging_cars.put((car.arrival_hour, next(unique), car))
+#     while not tmp_stack.empty():
+#         car = tmp_stack.get(False)[2]
+#         charging_cars.put((car.arrival_hour, next(unique), car))
 
 class StopCharging(CarEvent):
     def event_handler(self, simulation):
@@ -230,7 +219,7 @@ class StopCharging(CarEvent):
             self.car.charging_rate = 0
             simulation.state.add_charge(self.car.parking_spot, -ct.CHARGING_RATE)
             simulation.events.put((max(simulation.state.time, self.car.planned_departure), next(unique), Departure(self.car)))
-            remove_charging_car(self.car, simulation.state.charging_cars[self.car.parking_spot])
+            remove_car(simulation, self.car, simulation.state.charging_cars[self.car.parking_spot])
         # 
         
             # checking if another car can start charging
@@ -274,13 +263,13 @@ class ChangeNetwork(Event):
                     if not simulation.state.charging_cars[parking_lot].empty():
                         # print(f"Preempting car at {parking_lot}")
                         car = simulation.state.charging_cars[parking_lot].get(False)[2]
-                        if scheduled_car is None or car.arrival_hour < scheduled_car.arrival_hour:
+                        if scheduled_car is None or simulation.strategy.start_charge(simulation.state.time, car) < simulation.strategy.start_charge(simulation.state.time, scheduled_car):
                             scheduled_car = car
                         simulation.state.charging_cars[parking_lot].put((simulation.strategy.start_charge(simulation.state.time, car), next(unique), car))
             
             if scheduled_car is not None:
                 simulation.events.put((simulation.state.time, next(unique), ChangeCharge(scheduled_car, -reduce)))
-                remove_charging_car(scheduled_car, simulation.state.charging_cars[scheduled_car.parking_spot])
+                remove_car(simulation, scheduled_car, simulation.state.charging_cars[scheduled_car.parking_spot])
         
         # try to schedule new cars
             self.schedule_new_car(simulation)
@@ -316,7 +305,7 @@ class Departure(CarEvent):
     # def __str__(self):
         #return f'car arrived at {self.car.arrival_hour} with charging volume {self.car.charging_volume} leaving from {self.car.parking_spot + 1}'
     def event_handler(self, simulation):
-        print()
+        # print()
         # print(str(self.car.parking_spot + 1) + ": " + str(simulation.state.parking_spots_used[self.car.parking_spot]) + " -> " + str(simulation.state.parking_spots_used[self.car.parking_spot] - 1))
         simulation.state.parking_spots_used[self.car.parking_spot] -= 1
         ct.DEPARTURES += 1
