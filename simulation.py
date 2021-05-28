@@ -133,6 +133,21 @@ class State(object):
             
         return False
 
+    def overload_amount(self, parking_spot):
+        # return True to test if overload is allowed
+        # print(parking_spot)
+        sources = [11, 12, 13, 14, 0]
+
+        maximum = 0
+        # return False
+        for source in sources:
+            (cables, bottleneck) = self.bfs(source, parking_spot)
+            for i in range(len(cables)):
+                if (cables[i][1].load * cables[i][2] > 0 ) and cables[i][1].capacity != 0 and abs(cables[i][1].load) > cables[i][1].capacity:
+                    maximum = max(maximum, abs(cables[i][1].load) - cables[i][1].capacity)
+            
+        return maximum
+
     def charge_possible(self, parking_spot, rate):
         # return True to test if overload is allowed
         # print(parking_spot)

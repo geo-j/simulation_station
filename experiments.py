@@ -7,10 +7,11 @@ import csv
 import constants as ct
 
 def run_sim(run, strategy, scenario = 0):
-    print(f'======= Run {run} for {strategy.__name__} in scenario {scenario} =======')
+    print(f'======= Run {run} for {strategy.__name__} in scenario {ct.SCENARIO} =======')
     sim = simulation.Simulation(strategy())
     init(sim)
     while not sim.events.empty():
+        # print(sim.strategy)
         event_info = sim.events.get()
         sim.state.time = event_info[0]
         # print(sim.state.time)
@@ -39,15 +40,15 @@ def run_sim(run, strategy, scenario = 0):
             
             i = 0
             for cable in sim.state.cables:
-                with open(f'Results/all_runs_cable_{i}.csv', 'a') as f:
+                with open(f'Results/all_runs_cables_stats.csv', 'a') as f:
                     writer = csv.writer(f)
                     # max_load, % overload, % blackout
-                    writer.writerow((run, strategy.__name__, ct.SCENARIO, max(cable.loads, key = lambda l: l[1])[1], 100 * cable.overload / (float(sim.state.time) + 1), 100 * cable.blackout / (float(sim.state.time) + 1)))
+                    writer.writerow((run, strategy.__name__, ct.SCENARIO, i, max(cable.loads, key = lambda l: l[1])[1], 100 * cable.overload / (float(sim.state.time) + 1), 100 * cable.blackout / (float(sim.state.time) + 1)))
                 i += 1
 
         i = 0
         for cable in sim.state.cables:
-            with open(f'Results/{strategy.__name__}/{strategy.__name__}_cable_{i}_{ct.SCENARIO}_run_{run}.csv', 'a') as f:
+            with open(f'Results/cables.csv', 'a') as f:
                 writer = csv.writer(f)
                 # time, load
                 writer.writerows((run, ct.SCENARIO, sim.state.time, strategy.__name__, i, cable.loads))
