@@ -12,7 +12,7 @@ import numpy as np
 from itertools import count
 unique = count()
 
-sim = simulation.Simulation(s.BaseChargingStrategy())
+sim = simulation.Simulation(s.PriceDrivenChargingStrategy())
 
 def init(sim):
     arrival_hours = []
@@ -53,7 +53,7 @@ def init(sim):
             for h in range(24):
                 sim.events.put((h * ct.FRAME + ct.FRAME * i * 24, next(unique), e.ChangeSolarEnergy()))
 
-    sim.events.put((ct.N_BEGIN, next(unique), e.StartTracking()))
+    sim.events.put((ct.N_BEGIN, next(unique) + 0.5, e.StartTracking()))
     sim.events.put(((ct.N_DAYS - ct.N_END) * 24 * 3600, next(unique), e.StopTracking()))
     # print(f'init strategy {sim.strategy}')
     
