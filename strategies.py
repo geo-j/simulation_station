@@ -79,7 +79,7 @@ class PriceDrivenChargingStrategy(ChargingStrategy):
 
 
     def valid_time(self, start_time, car:Car):
-        return (start_time + car.charging_volume / ct.CHARGING_RATE < car.planned_departure)
+        return (start_time + ct.FRAME * car.charging_volume / ct.CHARGING_RATE < car.planned_departure)
 
 class FCFSChargingStrategy(ChargingStrategy):    
     def start_charge(self, time, car:Car):

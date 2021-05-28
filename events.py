@@ -209,6 +209,7 @@ class StartCharging(CarEvent):
 
 class StopCharging(CarEvent):
     def event_handler(self, simulation):
+        # print(f"{self.car} done at {simulation.state.time}, departure: {self.car.planned_departure}")
         if not self.car.done_charging and self.car.charging_volume - 1/float(100000000000) <= self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME:
 
             # print(f"Volume: {self.car.charging_volume}, Rate: {self.car.charging_rate}, Time: {simulation.state.time - self.car.started_charging}")
@@ -265,6 +266,7 @@ class ChangeNetwork(Event):
                         car = simulation.state.charging_cars[parking_lot].get(False)[2]
                         if scheduled_car is None or simulation.strategy.start_charge(simulation.state.time, car) < simulation.strategy.start_charge(simulation.state.time, scheduled_car):
                             scheduled_car = car
+                            # update reduce
                         simulation.state.charging_cars[parking_lot].put((simulation.strategy.start_charge(simulation.state.time, car), next(unique), car))
             
             if scheduled_car is not None:
