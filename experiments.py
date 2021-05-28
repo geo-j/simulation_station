@@ -6,7 +6,7 @@ import pandas as pd
 import csv
 import constants as ct
 
-def run_sim(run, strategy, scenario = 0):
+def run_sim(run, strategy):
     print(f'======= Run {run} for {strategy.__name__} in scenario {ct.SCENARIO} =======')
     sim = simulation.Simulation(strategy())
     init(sim)
@@ -28,7 +28,7 @@ def run_sim(run, strategy, scenario = 0):
             with open(f'Results/all_runs_stats.csv', 'a') as f:
                 writer = csv.writer(f)
                 # n_vehicles,percentage_delays,avg_delay,max_delay, total_delays, n_no_space
-                writer.writerow((run, strategy.__name__, ct.SCENARIO, sim.state.n_vehicles, sim.state.n_delays / sim.state.n_vehicles ,sim.state.delays_sum / sim.state.n_vehicles / 3600 ,sim.state.max_delay / 3600, sim.state.delays_sum, sim.state.n_no_space))
+                writer.writerow((run, strategy.__name__, ct.SCENARIO, sim.state.n_vehicles, sim.state.n_delays / sim.state.n_vehicles ,sim.state.delays_sum / sim.state.n_vehicles / ct.FRAME ,sim.state.max_delay / ct.FRAME, sim.state.delays_sum / ct.FRAME, sim.state.n_no_space))
 
             # i = 0
             # for cable in sim.state.cables:
@@ -55,10 +55,10 @@ def run_sim(run, strategy, scenario = 0):
             i += 1
 
 if __name__ == '__main__':
-    for run in range(31, 100):
+    for run in range(100):
         for strategy in [s.BaseChargingStrategy, s.PriceDrivenChargingStrategy, s.FCFSChargingStrategy, s.ELFSChargingStrategy]:
             for scenario in range(5):
                 ct.SCENARIO = scenario
-                run_sim(run, strategy, scenario)
+                run_sim(run, strategy)
         
         
