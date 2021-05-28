@@ -9,7 +9,7 @@ import constants as ct
 def run_sim(run, strategy, scenario = 0):
     print(f'======= Run {run} for {strategy.__name__} in scenario {ct.SCENARIO} =======')
     sim = simulation.Simulation(strategy())
-    sim = init(sim)
+    init(sim)
     while not sim.events.empty():
         # print(sim.strategy)
         event_info = sim.events.get()

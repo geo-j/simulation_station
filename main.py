@@ -47,6 +47,7 @@ def init(sim):
                         e.Arrival(actors.Car(arrival_hour = arrival_hour,    
                             connection_time = connection_time,   
                             charging_volume = charging_volume))))
+
         
         if type(sim.strategy) is not s.BaseChargingStrategy and type(sim.strategy) is not s.PriceDrivenChargingStrategy:
             for h in range(24):
@@ -54,6 +55,7 @@ def init(sim):
 
     sim.events.put((ct.N_BEGIN, next(unique), e.StartTracking()))
     sim.events.put(((ct.N_DAYS - ct.N_END) * 24 * 3600, next(unique), e.StopTracking()))
+    # print(f'init strategy {sim.strategy}')
     
 
 if __name__ == '__main__':
