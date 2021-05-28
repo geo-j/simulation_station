@@ -160,7 +160,7 @@ class Arrival(CarEvent):
             simulation.state.parking_spots_used[self.car.parking_spot] += 1
 
             if type(simulation.strategy) is strategies.BaseChargingStrategy or type(simulation.strategy) is strategies.PriceDrivenChargingStrategy:
-                simulation.events.put((simulation.state.time, next(unique), StartCharging(self.car)))
+                simulation.events.put((simulation.strategy.start_charge(simulation.state.time, self.car), next(unique), StartCharging(self.car)))
             else:   # if the car cannot be parked
                 # add car to parking spot queue
                 simulation.state.parking_queues[self.car.parking_spot].put((self.car.arrival_hour, next(unique), self.car))
@@ -194,11 +194,11 @@ class StartCharging(CarEvent):
             # print(self.car.charging_volume, self.car.connection_time)
             # if simulation.state.time + ct.FRAME * self.car.charging_volume / self.car.charging_rate > self.car.planned_departure:
             #    print(f"Departure Time: {ct.FRAME * self.car.charging_volume / self.car.charging_rate}")
-            simulation.state.charging_cars[self.car.parking_spot].put((self.car.arrival_hour, next(unique), self.car))
+            simulation.state.charging_cars[self.car.parking_spot].put((simulation.strategy.start_charge(simulation.state.time, self.car), next(unique), self.car))
             # print()
         else:
             # print("B")
-            simulation.state.parking_queues[self.car.parking_spot].put((self.car.arrival_hour, next(unique), self.car))
+            simulation.state.parking_queues[self.car.parking_spot].put((simulation.strategy.start_charge(simulation.state.time, self.car), next(unique), self.car))
         # check if a car needs to start / stop charging
         if type(simulation.strategy) is not strategies.BaseChargingStrategy and type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             simulation.events.put((simulation.state.time, next(unique), ChangeNetwork()))
@@ -275,7 +275,7 @@ class ChangeNetwork(Event):
                         car = simulation.state.charging_cars[parking_lot].get(False)[2]
                         if scheduled_car is None or car.arrival_hour < scheduled_car.arrival_hour:
                             scheduled_car = car
-                        simulation.state.charging_cars[parking_lot].put((car.arrival_hour, next(unique), car))
+                        simulation.state.charging_cars[parking_lot].put((simulation.strategy.start_charge(simulation.state.time, car), next(unique), car))
             
             if scheduled_car is not None:
                 simulation.events.put((simulation.state.time, next(unique), ChangeCharge(scheduled_car, -ct.CHARGING_RATE)))
@@ -315,6 +315,7 @@ class Departure(CarEvent):
     # def __str__(self):
         #return f'car arrived at {self.car.arrival_hour} with charging volume {self.car.charging_volume} leaving from {self.car.parking_spot + 1}'
     def event_handler(self, simulation):
+        print()
         # print(str(self.car.parking_spot + 1) + ": " + str(simulation.state.parking_spots_used[self.car.parking_spot]) + " -> " + str(simulation.state.parking_spots_used[self.car.parking_spot] - 1))
         simulation.state.parking_spots_used[self.car.parking_spot] -= 1
         ct.DEPARTURES += 1
