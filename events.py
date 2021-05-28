@@ -180,13 +180,13 @@ class StartCharging(CarEvent):
         #if(simulation.state.time != self.car.arrival_hour):
          #   print(f"Start: {self.car} at {simulation.state.time}")
         #print(f"Charge Possible2: {simulation.state.charge_possible(self.car.parking_spot + 1, ct.CHARGING_RATE)}")
-        if simulation.state.charge_possible(self.car.parking_spot + 1, ct.CHARGING_RATE) or type(simulation.strategy) is strategies.BaseChargingStrategy or type(simulation.strategy) is strategies.PriceDrivenChargingStrategy:
+        if simulation.state.charge_possible(self.car.parking_spot + 1, ct.CHARGING_RATE - self.car.charging_rate) or type(simulation.strategy) is strategies.BaseChargingStrategy or type(simulation.strategy) is strategies.PriceDrivenChargingStrategy:
             # print(f"Charging at {self.car.parking_spot + 1}")
             ct.STARTS += 1
             
             self.car.charging_volume -= self.car.charging_rate * (simulation.state.time - self.car.started_charging) / ct.FRAME
             self.car.started_charging = simulation.state.time
-            simulation.state.add_charge(self.car.parking_spot, ct.CHARGING_RATE)
+            simulation.state.add_charge(self.car.parking_spot, ct.CHARGING_RATE - self.car.charging_rate)
             self.car.charging_rate = ct.CHARGING_RATE
             # print(f'StartCharging schedule StopCharge at {self.car.parking_spot + 1}')
 
@@ -266,6 +266,7 @@ class ChangeNetwork(Event):
         # try to preempt cars
         if type(simulation.strategy) is not strategies.BaseChargingStrategy and type(simulation.strategy) is not strategies.PriceDrivenChargingStrategy:
             scheduled_car = None
+            reduce = ct.CHARGING_RATE
             for parking_lot in range(ct.N_PARKING_SPOTS):
                 # print(f"Causes overload: {simulation.state.causes_overload(parking_lot + 1)}")
                 if simulation.state.causes_overload(parking_lot + 1):
@@ -278,7 +279,7 @@ class ChangeNetwork(Event):
                         simulation.state.charging_cars[parking_lot].put((simulation.strategy.start_charge(simulation.state.time, car), next(unique), car))
             
             if scheduled_car is not None:
-                simulation.events.put((simulation.state.time, next(unique), ChangeCharge(scheduled_car, -ct.CHARGING_RATE)))
+                simulation.events.put((simulation.state.time, next(unique), ChangeCharge(scheduled_car, -reduce)))
                 remove_charging_car(scheduled_car, simulation.state.charging_cars[scheduled_car.parking_spot])
         
         # try to schedule new cars
