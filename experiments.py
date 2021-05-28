@@ -51,7 +51,8 @@ def run_sim(run, strategy):
             with open(f'Results/cables.csv', 'a') as f:
                 writer = csv.writer(f)
                 # time, load
-                writer.writerows((run, ct.SCENARIO, sim.state.time, strategy.__name__, i, cable.loads))
+                # print(run, ct.SCENARIO, sim.state.time, strategy.__name__, i, cable.load)
+                writer.writerow((run, ct.SCENARIO, sim.state.time, strategy.__name__, i, cable.load))
             i += 1
 
 if __name__ == '__main__':
