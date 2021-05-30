@@ -11,12 +11,9 @@ def run_sim(run, strategy):
     sim = simulation.Simulation(strategy())
     init(sim)
     while not sim.events.empty():
-        # print(sim.strategy)
         event_info = sim.events.get()
         sim.state.time = event_info[0]
-        # print(sim.state.time)
         event = event_info[2]
-        # print(event, sim.state.time)
         event.event_handler(sim)
 
         if type(event) is StopTracking:

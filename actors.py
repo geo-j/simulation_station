@@ -35,41 +35,19 @@ class Cable(object):
         self.loads = [(0, 0)]   # (time, load)
 
     def add_charge(self, charge:int, time):
-        
-        # MAKE SURE IT CAN BECOME NEGATIVE
-        # assumes no jumps of over 400 lol
 
         old_load = self.load
         self.load += charge
         self.loads.append([time, self.load])
-
-        # if not (old_load == 0 and self.load == 0):
-            # print(f"{old_load} => {self.load}")
-
-        # print("Old Load: " + str(old_load))
-        # print("New Load: " + str(self.load))
         
         if abs(old_load) <= self.capacity and abs(self.load) > self.capacity:
-            # print("entered overload")
             self.overload -= time
-            # print(self.overload)
 
         if abs(old_load) > self.capacity and abs(self.load) <= self.capacity:
-            # print("exit overload")
             self.overload += time
-            # print(self.overload)
 
         if abs(old_load) <= self.capacity * 1.1 and abs(self.load) > self.capacity * 1.1:
-            # print("entered blackout")
             self.blackout -= time
-            # print(self.blackout)
 
         if abs(old_load) > self.capacity * 1.1 and abs(self.load) <= self.capacity * 1.1:
-            # print("exit blackout")
             self.blackout += time
-            # print(self.blackout)
-        
-        # print("Cable has load: " + str(self.load))
-    
-    # def __str__(self):
-    #     return f'Cable:\n \tPercentage of Overload: {100 * self.overload / float(time)}\n \tPercentage of Blackout: {100 * self.blackout / float(time)}\n'

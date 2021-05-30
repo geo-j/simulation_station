@@ -13,7 +13,6 @@ class ChargingStrategy(object):
 
 class BaseChargingStrategy(ChargingStrategy):
     def start_charge(self, time, car):
-        # print(f'Car wants to charge at time {time}')
         return time
 
 class PriceDrivenChargingStrategy(ChargingStrategy):
@@ -35,7 +34,7 @@ class PriceDrivenChargingStrategy(ChargingStrategy):
                 best = (start_time, cost)
 
         for i in range(len(ct.PRICE_PER_KWH)): # each possible end time
-            # bit of a hack: add and then modulo to prevent underflow
+            # add and then modulo to prevent underflow
             start_time = ((24 * 3600) + time + hour_frame_time - (time % hour_frame_time) + i * hour_frame_time - car.charging_volume / ct.CHARGING_RATE) % (24 * 3600)
             cost = self.value_time(start_time, car)
             if cost < best[1] and self.valid_time(start_time, car):
@@ -47,7 +46,6 @@ class PriceDrivenChargingStrategy(ChargingStrategy):
         if cost < best[1] and self.valid_time(start_time, car):
             best = (start_time, cost)
 
-        # print(f'cost: {best[1] / 3600}')
         return best[0]
 
     def value_time(self, start_time, car:Car):
