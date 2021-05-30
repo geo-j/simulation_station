@@ -8,3 +8,4 @@ Data/charging_volume.csv
 Data/
 __pycache__
 Results/
+*.csv

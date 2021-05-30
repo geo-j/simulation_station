@@ -56,7 +56,7 @@ class State(object):
              (3, self.cables[3], 1)],
             [(4, self.cables[6], -1), # 10: Junction
              (5, self.cables[7], 1),
-             (6, self.cables[7], 1)],
+             (6, self.cables[8], 1)],
             [(1, actors.Cable(0, 0), 1)], # 11: P1 Source
             [(2, actors.Cable(0, 0), 1)], # 12: P2 Source
             [(6, actors.Cable(0, 0), 1)], # 13: P6 Source

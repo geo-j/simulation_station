@@ -266,7 +266,7 @@ class ChangeNetwork(Event):
                         car = simulation.state.charging_cars[parking_lot].get(False)[2]
                         if scheduled_car is None or simulation.strategy.start_charge(simulation.state.time, car) < simulation.strategy.start_charge(simulation.state.time, scheduled_car):
                             scheduled_car = car
-                            # update reduce
+                            # reduce = min(reduce, simulation.state.overload_amount(parking_lot + 1))
                         simulation.state.charging_cars[parking_lot].put((simulation.strategy.start_charge(simulation.state.time, car), next(unique), car))
             
             if scheduled_car is not None:
