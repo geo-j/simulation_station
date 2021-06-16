@@ -1,0 +1,35 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper, total={7in, 9in}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[]{verbatim}
+\usepackage{biblatex}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{csvsimple}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{rotating}
+% \usepackage{algorithmic}
+\usepackage[noend]{algpseudocode}
+\addbibresource{bib.bib}
+
+\title{Preparation - Granular Tabu Search for the Pickup and Delivery Problem with Time Windows and Electric Vehicles}
+\author{Georgiana Juglan - 2996307}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Summary}
+The paper addresses the problem of electrical vehicles (EVs) used for goods transportation for pickup and delivery within time windows (PDPTW-EV). The access to locations is thus restricted by time windows, and EVs are constrained by battery capacities and availability of recharging stations. The authors use granular tabu search (GTS) with their own policy to determine the amount of energy recharged. Hence, they model the problem as a graph and aim to solve it using an MIP with GTS as a metaheuristic for local search. As such, they penalise violations of pickup and delivery times, based on their precedence constraints, which allows them to find a feasible solution if it exists. Otherwise, they minimise the violations of battery capacity and time window constraints. In terms of results, they validate the approach on small test instances, and compare it to the results obtained with Gurobi: for 100 locations, their algorithm's performance was among the best best method in literature; for 200-400 locations, their algorithm takes a middle position with respect to optimising the primary objective of minimising the number of routes. Nonetheless, for large instances GTS can handle partial recharging strategy by comparison to full recharging, which results in a noticeable decrease in the number of vehicles required and the distance travelled. Therefore, GTS performs competitively on benchmark instances of the PDPTW-EV, and the authors are interested in future work relating to placement of recharging stations at customer locations, and analysis of how this would improve the additional time spent travelling and recharging.
+
+\section{Points}
+    \begin{itemize}
+        \item \textbf{Strong Point}: The experiment setup in itself was inspired and creative. I believe using partially charged vehicles would come as unintuitive for better results. However, it is interesting that it was considered in the first place and turned out to perform so well, especially in terms of reducing the number of vehicles used and distance travelled.
+        \item \textbf{Weak Point}: It seems that the algorithm performs very well on small instances, albeit a very long processing time. That however does not completely motivate choosing it over already existing faster heuristics for small instances. It additionally addresses mainly reducing the number of vehicles and total distance travelled (over for example explicitly minimising energy costs or time spent recharging).
+    \end{itemize}
+
+\section{Question}
+If the planning horizon is short, the partial recharging strategy leads to a considerably reduced number of vehicles and total distance. Would this still hold for longer planning horizons, or would they need to deploy another strategy?
+\end{document}

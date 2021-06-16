@@ -1,0 +1,35 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper, total={7in, 9in}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[]{verbatim}
+\usepackage{biblatex}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{csvsimple}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{rotating}
+% \usepackage{algorithmic}
+\usepackage[noend]{algpseudocode}
+\addbibresource{bib.bib}
+
+\title{Preparation - Exact Algorithms for Electric Vehicle-Routing Problems with Time Windows}
+\author{Georgiana Juglan - 2996307}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Summary}
+The paper addresses the problem of route planning for battery electric commercial vehicles (ECVs) with time windows. The motivation behind this choice is that ECVs have a limited autonomy and they require to be charged at charging stations during the course of a route. The paper then solves different combinations of these factors: multiple recharges per route, full recharges only, at most a single recharge per route, with partial recharges, and multiple, partial recharges per route. In order to do so, 8 branch-price-and-cut algorithms are deployed, which rely on mono- and bidirectional labelling algorithms for generating feasible routes. These procedures are based on linear relaxations, each of them being solved with column generation. Additional valid inequalities are added to strengthen the LP-relaxation bound, and integer solutions are finally enforced by branching. During column generation, relaxations of the variant of the shortest-path problem with resource constraints are solved. This results in the fact that on average, only relatively few branch-and-bound nodes need to be explored because of the state-of-the-art techniques used for reducing integrality gaps. The algorithms have been then implemented in C ++, using CPLEX as an LP-solver, and all 4 variants were solvable for instances up to 100 customers and 21 recharging stations. They all showed that both multiple and partial recharges help reduce routing costs and the number of employed vehicles in comparison to the single/full charging variants. Larger instances with up to 50 and 100 customers have been analysed as well, and there bidirectional labelling deemed superior to monodirectional labelling. The success of the algorithms was eventually attributed to the customised resource extension functions (REFs).
+
+\section{Points}
+    \begin{itemize}
+        \item \textbf{Strong Point}: analysis of (all possible) diverse scenarios (single/full recharges to multiple/partial recharges), with a complex solution algorithm that combines various already existing techniques (LP-relaxation, column generation, REFs)
+        \item \textbf{Weak Point}: The paper only tangentially addresses how their results would affect real-life scenarios. For example, what deploying more frequent and shorter charging scenarios would mean for the schedule of the drivers is not discussed
+    \end{itemize}
+
+\section{Question}
+Because multiple/partial recharges seemed to perform the best, would this not be a problem in terms of drivers scheduling and costs as well? Or is this taken into account by the travelling cost? (I assume recharging multiple times during a route would result in longer working hours)
+\end{document}

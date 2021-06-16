@@ -1,0 +1,35 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper, total={7in, 9in}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[]{verbatim}
+\usepackage{biblatex}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{csvsimple}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{rotating}
+% \usepackage{algorithmic}
+\usepackage[noend]{algpseudocode}
+\addbibresource{bib.bib}
+
+\title{Preparation - Machine Learning Meets Mathematical Optimisation to Predict the Optimal Production of Offshore Wind Parks}
+\author{Georgiana Juglan - 2996307}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Summary}
+The paper addresses the optimisation problem in the context of choosing offshore wind farm layouts based on their constraints (such as the wake effect). That is, finding an optimal placement of wind turbines in a given area such that the park power production is maximised. This issue is aimed to be addressed using a combination of Mathematical Optimisation and Machine Learning techniques to approximate the value of optimised solutions. More specifically, the paper observes how different ML techniques, trained on a large number of optimised solutions can fast and accurately predict the value of the (optimised) solution on new instances. In this way, the ML models are trained on (almost) optimal solutions from the slow(er) MO models. This offers an initial accurate overview about possible wind parks placements much faster than the optimal state-of-the-art MILP-based techniques, hence without the need to run computationally expensive MO algorithms every time (few minutes for ML compared to several hours for MO). This is achieved by training a Linear Regression, a Neural Network, and a Support Vector Regression model on a real dataset of around 2000 layouts, and testing it on approximately 1000 other instances. The model comparison is then done against the regular grid production (offering a lower bound for the optimised solution), and the true production (solved by an MILP to optimality). The results found are supporting the expectation that ML techniques are indeed surpassing the grid (human specialist/baseline) solution, while also offering reasonably close predictions to the optimal MO.
+
+\section{Points}
+    \begin{itemize}
+        \item \textbf{Strong Point}: tackling the problem by estimating the output value instead of the solution itself is quite an ingenious idea. By having an optimal value approximation, the solution can be then found based on that value. In this way, they creatively rule out a set of constraints. %the differentiation between estimating the output value, instead of the solution itself, since a solution can be derived by experts after finding the value given a baseline layout, rather than trying to optimise too many things at the same time
+        \item \textbf{Weak Point}: analysing only rectangular park shape. I believe it would be interesting to also optimise the layout itself; perhaps with hexagon or triangles, since the wake effect takes a conical shape (in the drawings)
+    \end{itemize}
+
+\section{Question}
+Wouldn't the ML results have been better and more accurate, have they trained the model on completely solved solutions (unlike partial solutions as they do now)? As they said, you only train and run the optimisation models once.
+\end{document}
