@@ -9,3 +9,12 @@ Data/
 __pycache__
 Results/
 *.csv
+*.fls
+*.log
+*.fdb_latexmk
+*.bcf
+*.bbl
+*.aux
+*.xml
+*.gz
+*.blg
