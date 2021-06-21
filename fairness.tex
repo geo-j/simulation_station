@@ -1,0 +1,35 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper, total={7in, 9in}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[]{verbatim}
+\usepackage{biblatex}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{csvsimple}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{rotating}
+% \usepackage{algorithmic}
+\usepackage[noend]{algpseudocode}
+\addbibresource{bib.bib}
+
+\title{Preparation - Fairness in Power Flow Network Congestion Management with Outer Matching and Principal Notions of Fair Division}
+\author{Georgiana Juglan - 2996307}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Summary}
+The paper presents a theoretical approach to addressing network flow congestions in power networks, with a focus on low-voltage networks caused by distributed and renewable energy sources. The authors deploy a fairness approach in the context of curtailing distributed and renewable energy sources. They prioritise in this way local, outer matching and allocate grid access through fair division of available capacity. Congestion is thus solved with recursive matching of supply and demand of localities outward from nodes in the network. This approach prioritieses matching in the peripheral network, reducing strain and losses on the network infrastructure. Three fairness options are considered: proportional, egalitarian and nondiscriminatory divison. In the proportional view, each agent is allocated a portion of the good that is proportional to the ratio of its claim to the sum of all claims, with all agents being treated equally, and the relations between claims being preserved; in the egalitarian view, each agent is allocated the same portion, unless its claim is smaller than the portion; all agents are treated equally, reducing all claims to the same amount; the nondiscriminatory division reduced the portion of each agent by the same amount regardless of its claim, to a minimum of zero; all agents are treated equally, reducing all claims by the same amount. In this way, an $O(nm)$ algorithm is deployed for the proportional notion of fairness, and an $O(nm\log m)$ one for the other two variants (with $n$ being the number of vertices in the network and $m$ the number of agents), ensuring a fast execution time.
+
+\section{Points}
+    \begin{itemize}
+        \item \textbf{Strong Point}: the paper addresses the problem from a more philosophical and moral point of view, instead from a solely optimisation motivation
+        \item \textbf{Weak Point}: the paper offers only a theoretical algorithm, with no implementation or regard for real data
+    \end{itemize}
+
+\section{Question}
+What is the current status of energy division (is it unfair?)? How feasible would transitioning to such a fair energy division system be? 
+\end{document}

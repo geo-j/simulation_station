@@ -1,0 +1,35 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper, total={7in, 9in}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[]{verbatim}
+\usepackage{biblatex}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{csvsimple}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{rotating}
+% \usepackage{algorithmic}
+\usepackage[noend]{algpseudocode}
+\addbibresource{bib.bib}
+
+\title{Preparation - Is a 100\% renewable European power system feasible by 2050?}
+\author{Georgiana Juglan - 2996307}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Summary}
+The paper considers 7 scenarios for the European power system in 2050 based on 100\% renewable energy sources (RES), assuming different levels of future demand and available technology. They model them using an MILP, and then compare them with a scenario which includes low-carbon non-renewable technologies. There were no feasible solutions for the case where no biomass is included at all. Instead, biomass turned out to play an important role in stabilising the production uncertainties of wind and solar energy. An alternative to using biomass for stabilisation would be integrating heat pumps and electric vehicles into the power system to reduce demand peaks and biogas requirements. The authors thus found out that relying on biomass could allow an operative RES-based European system at today's levels when relying on European resources only. However, this would require a 90\% increase in generation capacity, reliable cross-border transmission capacities, large-scale mobilisation of Europe's biomass resources, with power sector biomass consumption, and increasing solid biomas and biogas capacity. Nonetheless, the installation of a RES would produce 30\% larger costs, and it might still not deliver the level of emission reductions necessary to achieve Europe's climate goals by 2050, as negative emissions from biomass and carbon capture and storage might be required to be further reduced. Some modelling shortcomings are however not considered, such as unpredictable changes in future weather and climate, actual transitioning from the current system, the security of the system itself, neither the necessary upgrade for the low-voltage distribution grid.
+
+\section{Points}
+    \begin{itemize}
+        \item \textbf{Strong Point}: extensive study addressing important current climate problems, with a practical aspect in mind, by analysing different combination scenarios of RES
+        \item \textbf{Weak Point}: the paper does not consider the transition to the system, which I believe is one of the main challenges in adopting a fully RES system
+    \end{itemize}
+
+\section{Question}
+Since this is only modelled for the EU, would this mean that the non-EU Eastern European countries would be disconnected from the grid? If so, how would they get/produce their energy?
+\end{document}
